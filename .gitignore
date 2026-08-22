@@ -1,0 +1,21 @@
+# O dataset da Kovan NAO entra neste repositorio. Ele e dado real de carteira
+# LATAM e este repositorio e publico. O arquivo chega pelo canal da turma e
+# fica so na sua maquina.
+dados/*.csv
+dados/*.xlsx
+dados/*.xls
+dados/*.parquet
+
+# Saida da analise: cada grupo gera a sua.
+figuras/*.png
+figuras/*.svg
+saida/
+*.html
+
+# Ambiente
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
