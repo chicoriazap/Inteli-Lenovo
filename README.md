@@ -10,7 +10,8 @@ git clone https://github.com/josercf/inteli-pos-2026-2a-eda.git
 cd inteli-pos-2026-2a-eda
 ```
 
-1. Copie `datasets_case_modulo2.xlsx` para a pasta `dados/`.
+1. Baixe a planilha em https://docs.google.com/spreadsheets/d/1wX8BgKz4Wq0A3cWBZLC3PxYcqmCzBOSe pelo menu **Arquivo > Fazer download >
+   Microsoft Excel**, e salve como `dados/datasets_case_modulo2.xlsx`.
 2. Abra esta pasta no Antigravity.
 3. Confirme que o agente leu o `AGENTS.md`, pedindo a ele que resuma as regras
    da sessão.

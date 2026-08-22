@@ -1,7 +1,13 @@
 # Onde o dataset vai
 
-Coloque aqui o arquivo `datasets_case_modulo2.xlsx`, distribuído pelo canal da
-turma.
+Coloque aqui o arquivo `datasets_case_modulo2.xlsx`.
+
+Ele está em:
+
+    https://docs.google.com/spreadsheets/d/1wX8BgKz4Wq0A3cWBZLC3PxYcqmCzBOSe
+
+No Google Sheets, use **Arquivo > Fazer download > Microsoft Excel (.xlsx)** e
+salve o resultado nesta pasta, com o nome exato abaixo.
 
 O arquivo não está neste repositório e não deve ser adicionado a ele. São dados
 reais de uma carteira LATAM, e este repositório é público. O `.gitignore` da

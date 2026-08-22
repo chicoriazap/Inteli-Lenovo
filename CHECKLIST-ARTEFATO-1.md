@@ -22,12 +22,18 @@ vale.
 - [ ] Quantas contas cada aba tem e quantas cruzam com o painel
 
 ### 2. QUALIDADE
-Cada advertência encontrada, a decisão tomada e o custo dela em número de linhas.
+O `registro-de-tratamento.md` que a skill de limpeza produz: cada advertência, a
+decisão tomada e o custo dela em número de linhas.
 
 - [ ] As seis dimensões medidas coluna a coluna
 - [ ] Uma decisão declarada por advertência, com justificativa em uma frase
 - [ ] O custo de cada decisão, medido no indicador que ela altera
+- [ ] O mesmo indicador recalculado sob a alternativa descartada
 - [ ] O que não foi possível verificar, e por quê
+
+**Teste da troca de pastas.** A mesa ao lado copia a skill e o registro de
+vocês, executa contra a base crua e chega aos mesmos números. Número que não
+bate aponta o passo do registro que só fazia sentido para quem escreveu.
 
 ### 3. UNIVARIADA
 Distribuição das variáveis principais, com a leitura escrita de cada figura.
