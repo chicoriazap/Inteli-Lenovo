@@ -29,3 +29,10 @@ __pycache__/
 # churn_label, que e exatamente o achado que a Pratica 3 pede que a turma
 # derive sozinha. Commitado aqui, o repositorio publico entrega o gabarito.
 analises/
+
+# As saidas declaradas das skills. Cada grupo gera as suas, e a versao do
+# professor entregaria a analise pronta a quem clonar.
+perfil.md
+univariada.md
+bivariada.md
+registro-de-tratamento.md
