@@ -1,7 +1,7 @@
 # Instruções do agente
 
-Este repositório é o ambiente de trabalho da Aula 03 do Módulo 2 do MBA em IA e
-Dados para Negócios (Inteli x Lenovo). O agente que abrir esta pasta trabalha
+Este repositório é o ambiente de trabalho das Aulas 03 e 04 do Módulo 2 do MBA
+em IA e Dados para Negócios (Inteli x Lenovo). O agente que abrir esta pasta trabalha
 sob as regras abaixo, sem exceção e sem precisar que o aluno as repita.
 
 ## Regras que valem para toda a sessão
@@ -24,8 +24,9 @@ sob as regras abaixo, sem exceção e sem precisar que o aluno as repita.
 - `dados/datasets_case_modulo2.xlsx`: as cinco abas do case. Não versionado,
   colocado pelo aluno.
 - `skills/`: os fluxos que este agente deve seguir quando o aluno pedir
-  perfilamento, limpeza, análise univariada ou análise bivariada. Leia o arquivo
-  correspondente antes de executar a tarefa.
+  perfilamento, limpeza, análise univariada, análise bivariada, perfil por
+  segmento ou figura que decide. Leia o arquivo correspondente antes de
+  executar a tarefa.
 - `CHECKLIST-ARTEFATO-1.md`: as sete seções do entregável da Semana 5.
 - `analise_referencia.py`: saída de emergência. Só execute se o aluno pedir.
 
@@ -49,3 +50,6 @@ qualquer junção e informe quantas linhas cada junção perde.
 - Não conclui causa a partir de correlação. Traga a medida e diga o que ela
   não sustenta.
 - Não inventa coluna que a base não tem.
+- Não testa hipótese na base inteira quando o rótulo não alcança parte dela.
+  Restrinja à população elegível, como manda `skills/bivariada.md`, Passo 1a.
+- Não entrega figura sem o teste escrito embaixo (`skills/figura-que-decide.md`).

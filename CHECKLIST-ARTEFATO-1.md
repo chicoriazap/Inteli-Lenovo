@@ -10,7 +10,7 @@ Grupo: ____________________________   Data: ____ / ____ / 2026
 
 ---
 
-## Fecha na oficina de hoje
+## Fechou na oficina da Aula 03
 
 ### 1. CARGA
 As cinco abas carregadas, com a contagem de linhas de cada uma conferida contra
@@ -53,12 +53,13 @@ Cruzamentos contra o `churn_label`, com tabela de contingência.
 
 ---
 
-## Vai para o autoestudo da semana
+## Fecha na oficina da Aula 04
 
 ### 5. RÓTULO
 O critério que o `churn_label` usa, reconstruído a partir do dado, e o efeito de
 cortes alternativos.
 
+- [ ] A população que o rótulo consegue marcar, com a contagem das contas que ficam fora
 - [ ] O critério recuperado, com a evidência que o sustenta
 - [ ] O que o critério deixa de fora
 - [ ] Pelo menos três cortes alternativos, com o tamanho da fila de cada um
@@ -70,10 +71,12 @@ As figuras que sustentam a segmentação e as personas da manhã.
 - [ ] Uma figura por segmento da segmentação do grupo
 - [ ] Faixas reais das variáveis usadas em cada persona
 - [ ] Cada característica de persona apontando para o número que a produziu
+- [ ] O teste escrito embaixo de cada figura: intervalo, qui-quadrado ou estratificação, e a população
 
 ### 7. LIMITAÇÕES
 O que a base não permite responder.
 
+- [ ] A causa que o dado observacional não fecha, dita com a associação que sobreviveu
 - [ ] As perguntas do Comitê que esta base não fecha
 - [ ] O dado que faltaria para fechá-las
 - [ ] O que a análise assume e não conseguiu verificar

@@ -33,12 +33,14 @@ produzidos por código que roda nesta pasta.
 | `skills/limpeza-de-dados.md` | o tratamento das advertências, com o custo medido |
 | `skills/univariada.md` | o fluxo de análise de uma variável por vez |
 | `skills/bivariada.md` | o fluxo de cruzamento contra o rótulo |
+| `skills/perfil-por-segmento.md` | como cada segmento compra, sobre as contas elegíveis |
+| `skills/figura-que-decide.md` | a forma, o título e o teste embaixo de cada figura |
 | `CHECKLIST-ARTEFATO-1.md` | as sete seções do entregável da Semana 5 |
 | `analise_referencia.py` | saída de emergência, se o ambiente travar |
 
 ## As skills
 
-Os quatro arquivos em `skills/` são instruções que o agente lê da pasta e
+Os seis arquivos em `skills/` são instruções que o agente lê da pasta e
 executa sem que você as repita na conversa. Eles são reutilizáveis fora deste
 curso: `limpeza-de-dados.md` e `perfilamento.md` não têm nada específico da
 Kovan, e servem para qualquer base que chegar na sua mesa.

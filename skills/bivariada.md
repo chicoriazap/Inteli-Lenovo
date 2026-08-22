@@ -9,6 +9,14 @@ Cruze o alvo com uma variável de cada vez. Dois cortes simultâneos escondem qu
 dos dois produziu o efeito, e desfazer isso depois custa mais do que fazer na
 ordem certa.
 
+## Passo 1a: quem pode exibir o desfecho
+
+Antes de cruzar, pergunte se toda conta da base tinha como receber o rótulo.
+Um rótulo que depende de tempo decorrido (treze meses sem compra, no caso da
+Kovan) não alcança conta que entrou tarde. Restrinja à população que pode
+exibir o desfecho e informe quantas contas saíram. Hipótese testada na base
+inteira mistura "não perdeu" com "não teve tempo de perder".
+
 ## Passo 2: a tabela de contingência
 
 Para variável categórica, traga na mesma tabela:
@@ -35,6 +43,20 @@ Correlação alta entre uma variável e o alvo pode significar três coisas
 diferentes: a variável antecipa o alvo, a variável é consequência do alvo, ou as
 duas dependem de um terceiro fator. Diga qual das três você consegue descartar
 com esta base e qual você não consegue.
+
+## Passo 4a: estratifique antes de concluir
+
+Para toda associação que sobreviver ao ruído (intervalos de confiança que não
+se cruzam, qui-quadrado com p abaixo de 0,05), repita a medida dentro de cada
+estrato de um terceiro fator plausível: segmento, coorte de entrada, faixa de
+frequência de compra. Três desfechos possíveis, e o relatório diz qual ocorreu:
+
+- a diferença se mantém em todos os estratos: sobrevive;
+- a diferença some dentro dos estratos: a variável era proxy do fator de
+  estratificação;
+- a diferença inverte em algum estrato: a associação no total é composição.
+
+Estrato com menos de 30 contas em qualquer dos grupos entra marcado.
 
 ## Passo 5: o teste de vazamento
 
