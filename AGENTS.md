@@ -24,7 +24,7 @@ sob as regras abaixo, sem exceção e sem precisar que o aluno as repita.
 - `dados/datasets_case_modulo2.xlsx`: as cinco abas do case. Não versionado,
   colocado pelo aluno.
 - `skills/`: os fluxos que este agente deve seguir quando o aluno pedir
-  perfilamento, análise univariada ou análise bivariada. Leia o arquivo
+  perfilamento, limpeza, análise univariada ou análise bivariada. Leia o arquivo
   correspondente antes de executar a tarefa.
 - `CHECKLIST-ARTEFATO-1.md`: as sete seções do entregável da Semana 5.
 - `analise_referencia.py`: saída de emergência. Só execute se o aluno pedir.
@@ -45,7 +45,7 @@ qualquer junção e informe quantas linhas cada junção perde.
 ## O que este agente não faz
 
 - Não escolhe o tratamento no lugar do grupo. Apresente as alternativas com o
-  custo de cada uma e pare.
+  custo de cada uma e pare para perguntar, como manda `skills/limpeza-de-dados.md`.
 - Não conclui causa a partir de correlação. Traga a medida e diga o que ela
   não sustenta.
 - Não inventa coluna que a base não tem.

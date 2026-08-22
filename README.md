@@ -28,18 +28,27 @@ produzidos por código que roda nesta pasta.
 | Arquivo | Para quê |
 |---|---|
 | `AGENTS.md` | as regras que o agente carrega ao abrir a pasta |
-| `skills/perfilamento.md` | o fluxo de perfilamento das cinco abas |
+| `skills/perfilamento.md` | o fluxo de perfilamento de uma base desconhecida |
+| `skills/limpeza-de-dados.md` | o tratamento das advertências, com o custo medido |
 | `skills/univariada.md` | o fluxo de análise de uma variável por vez |
 | `skills/bivariada.md` | o fluxo de cruzamento contra o rótulo |
 | `CHECKLIST-ARTEFATO-1.md` | as sete seções do entregável da Semana 5 |
 | `analise_referencia.py` | saída de emergência, se o ambiente travar |
 
-## A skill que vocês escreveram na Aula 02
+## As skills
 
-A `skill-limpeza-kovan.md` que o grupo preencheu na semana passada foi escrita
-para o painel sintético, que tinha outras colunas e outras advertências.
-Coloque-a em `skills/` e execute-a contra a base nova. Medir o que dela ainda
-funciona é a Prática 1 da aula.
+Os quatro arquivos em `skills/` são instruções que o agente lê da pasta e
+executa sem que você as repita na conversa. Eles são reutilizáveis fora deste
+curso: `limpeza-de-dados.md` e `perfilamento.md` não têm nada específico da
+Kovan, e servem para qualquer base que chegar na sua mesa.
+
+Para executar, peça ao agente pelo caminho do arquivo:
+
+    execute skills/perfilamento.md sobre dados/datasets_case_modulo2.xlsx
+
+A skill de limpeza mede, apresenta as três decisões possíveis com o custo de
+cada uma, e **para para perguntar**. A decisão continua sendo de quem responde
+pelo número. O que ela produz é o `registro-de-tratamento.md`, que é o artefato.
 
 ## Saída de emergência
 
