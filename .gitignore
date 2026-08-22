@@ -19,3 +19,13 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .DS_Store
+
+# Ambiente instalado dentro da pasta pelo agente. Sao centenas de MB de
+# bibliotecas e nada disso e material de aula.
+.venv_libs/
+
+# Scripts que cada grupo produz durante a aula, e os da demonstracao do
+# professor. NAO versionar: data_corte_churn.py recupera a data que separa o
+# churn_label, que e exatamente o achado que a Pratica 3 pede que a turma
+# derive sozinha. Commitado aqui, o repositorio publico entrega o gabarito.
+analises/
