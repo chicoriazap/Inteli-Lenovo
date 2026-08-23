@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Saída de emergência: os números da Aula 03, lidos do dataset oficial.
+"""Saída de emergência: os números das Aulas 03 e 04, lidos do dataset oficial.
 
 Este script existe para que uma mesa com o ambiente travado continue a aula. Ele
 não substitui a análise do grupo: o artefato é o código que vocês escreverem.
@@ -17,6 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 RAIZ = Path(__file__).resolve().parent
 XLSX = RAIZ / "dados" / "datasets_case_modulo2.xlsx"
@@ -228,6 +229,122 @@ def tempo_de_casa_por_rotulo() -> dict[str, int | float]:
     }
 
 
+# ---------------------------------------------------------------------------
+# Aula 04: elegibilidade e testes de hipótese
+# ---------------------------------------------------------------------------
+
+# Última primeira-compra que ainda deixa treze meses de painel pela frente.
+ULTIMO_MES_ELEGIVEL = "2025-02"
+
+
+def _wilson(k: int, n: int) -> tuple[float, float, float]:
+    lo, hi = stats.binomtest(int(k), int(n)).proportion_ci(method="wilson")
+    return k / n, float(lo), float(hi)
+
+
+@lru_cache(maxsize=1)
+def contas_enriquecidas() -> pd.DataFrame:
+    d = carregar()
+    c = contas().copy()
+    ped = d["pedidos"].copy()
+    ped["Order Date"] = pd.to_datetime(ped["Order Date"])
+    por_conta = ped.sort_values("Order Date").groupby("account_id")["Order Date"]
+    c["dias_de_compra"] = por_conta.nunique()
+    c["intervalo_mediano"] = por_conta.apply(
+        lambda s: s.drop_duplicates().diff().dt.days.median())
+    mix = d["mix"]
+    c["marcas"] = mix.groupby("account_id").Brand.nunique()
+    c["marca_dominante"] = (mix.sort_values("pct_receita", ascending=False)
+                            .drop_duplicates("account_id").set_index("account_id").Brand)
+    c["elegivel"] = c.primeiro_mes <= ULTIMO_MES_ELEGIVEL
+    c["faixa_marcas"] = c.marcas.clip(upper=4).astype(int).astype(str).replace("4", "4+")
+    c["faixa_dias"] = pd.cut(c.dias_de_compra, [0, 1, 2, 5, 10**6],
+                             labels=["1", "2", "3 a 5", "6+"]).astype(str)
+    return c
+
+
+def elegiveis() -> pd.DataFrame:
+    c = contas_enriquecidas()
+    return c[c.elegivel]
+
+
+def populacoes() -> dict[str, dict]:
+    c = contas_enriquecidas()
+    saida = {}
+    for nome, mascara in (("carteira", np.ones(len(c), dtype=bool)),
+                          ("elegiveis", c.elegivel.to_numpy()),
+                          ("nao_elegiveis", (~c.elegivel).to_numpy())):
+        s = c[mascara]
+        prev, lo, hi = _wilson(int(s.churn.sum()), len(s))
+        saida[nome] = {"contas": len(s), "perdidas": int(s.churn.sum()),
+                       "prevalencia": prev, "ic_inferior": lo, "ic_superior": hi}
+    return saida
+
+
+def perfil_por_segmento() -> pd.DataFrame:
+    e = elegiveis()
+    t = e.groupby("segmento").agg(
+        contas=("churn", "size"), perdidas=("churn", "sum"), prevalencia=("churn", "mean"),
+        receita_mediana=("receita", "median"), dias_mediano=("dias_de_compra", "median"),
+        marcas_mediana=("marcas", "median"), intervalo_mediano=("intervalo_mediano", "median"),
+        marca_dominante=("marca_dominante", lambda s: s.mode().iloc[0]),
+    )
+    return t.sort_values("prevalencia", ascending=False)
+
+
+def tabela_com_ic(coluna: str, df: pd.DataFrame | None = None):
+    """Contingência com IC de Wilson por categoria e qui-quadrado da tabela."""
+    df = elegiveis() if df is None else df
+    t = df.groupby(coluna, observed=True).churn.agg(contas="size", perdidas="sum")
+    ics = [_wilson(int(k), int(n)) for n, k in zip(t.contas, t.perdidas)]
+    t["prevalencia"] = [p for p, _, _ in ics]
+    t["ic_inferior"] = [lo for _, lo, _ in ics]
+    t["ic_superior"] = [hi for _, _, hi in ics]
+    qui2, p, gl, _ = stats.chi2_contingency(pd.crosstab(df[coluna], df.churn))
+    return t, float(qui2), int(gl), float(p)
+
+
+def estratificar(coluna_teste: str, valor_a, valor_b, estrato: str) -> pd.DataFrame:
+    """Prevalência do grupo A contra o grupo B dentro de cada estrato.
+
+    Para `marcas`, `valor_b` é um piso: 3 significa três ou mais marcas. Para
+    `regiao`, `valor_b == "outros"` significa todas as regiões exceto `valor_a`.
+    Estrato com menos de 30 contas em qualquer dos grupos fica de fora.
+    """
+    e = elegiveis()
+    if coluna_teste == "marcas":
+        grupo_a, grupo_b = e.marcas == valor_a, e.marcas >= valor_b
+    elif coluna_teste == "regiao" and valor_b == "outros":
+        grupo_a, grupo_b = e.regiao == valor_a, e.regiao != valor_a
+    else:
+        grupo_a, grupo_b = e[coluna_teste] == valor_a, e[coluna_teste] == valor_b
+    linhas = {}
+    for nome, g in e.groupby(estrato, observed=True):
+        a, b = g[grupo_a.loc[g.index]], g[grupo_b.loc[g.index]]
+        if len(a) < 30 or len(b) < 30:
+            continue
+        pa, loa, hia = _wilson(int(a.churn.sum()), len(a))
+        pb, lob, hib = _wilson(int(b.churn.sum()), len(b))
+        linhas[nome] = {"n_a": len(a), "prev_a": pa, "lo_a": loa, "hi_a": hia,
+                        "n_b": len(b), "prev_b": pb, "lo_b": lob, "hi_b": hib}
+    return pd.DataFrame.from_dict(linhas, orient="index")
+
+
+def aula04() -> None:
+    print("\n=== Aula 04: populações ===")
+    for nome, v in populacoes().items():
+        print(f"  {nome:14} {v['contas']:5} contas  {v['perdidas']:5} perdidas  "
+              f"{v['prevalencia']:.3f} [{v['ic_inferior']:.3f}, {v['ic_superior']:.3f}]")
+    print("\n=== Aula 04: perfil por segmento (elegíveis) ===")
+    print(perfil_por_segmento().round(3).to_string())
+    for col in ("faixa_marcas", "faixa_dias"):
+        t, q, gl, p = tabela_com_ic(col)
+        print(f"\n=== Aula 04: {col}: qui2={q:.1f} gl={gl} p={p:.1e} ===")
+        print(t.round(3).to_string())
+    print("\n=== Aula 04: marcas 1 contra 3+, por faixa de dias de compra ===")
+    print(estratificar("marcas", 1, 3, "faixa_dias").round(3).to_string())
+
+
 def main() -> None:
     q, r, p = qualidade(), receita_univariada(), perfil_do_rotulo()
     print("=== formato das abas ===")
@@ -262,6 +379,7 @@ def main() -> None:
         print(f"  >= {corte:>2} meses: fila {v['fila']:>5}  "
               f"captura {v['captura_do_rotulo_oficial']:.4%}  "
               f"receita {v['receita_da_fila']:,.0f}")
+    aula04()
 
 
 if __name__ == "__main__":
