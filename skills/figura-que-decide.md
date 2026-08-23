@@ -18,9 +18,10 @@ A forma da figura é escolhida pela pergunta, nunca pelo gosto:
 
 ## Passo 2: o título é a conclusão, com o número dentro
 
-O título da figura declara o que ela prova, com o número que prova. "Uma
-marca perde 66,4% e quatro ou mais perdem 16,1%" é título. "Prevalência por
-número de marcas" é rótulo de eixo.
+O título da figura declara o que ela prova, com o número que prova e a
+população sobre a qual ele foi medido. "Nas contas elegíveis, uma marca perde
+66,4% e quatro ou mais perdem 16,1%" é título. "Prevalência por número de
+marcas" é rótulo de eixo.
 
 ## Passo 3: desenhe o ruído e o limite
 
