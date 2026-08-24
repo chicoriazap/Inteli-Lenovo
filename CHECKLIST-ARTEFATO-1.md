@@ -63,6 +63,9 @@ cortes alternativos.
 - [ ] O critério recuperado, com a evidência que o sustenta
 - [ ] O que o critério deixa de fora
 - [ ] Pelo menos três cortes alternativos, com o tamanho da fila de cada um
+- [ ] Um corte por segmento, derivado do ritmo de recompra do próprio segmento
+      (percentil dos silêncios seguidos de retorno), comparado ao corte único:
+      fila, captura do rótulo oficial e a censura declarada
 - [ ] O teste de vazamento aplicado a toda variável que separa bem demais
 
 ### 6. VISUAIS
