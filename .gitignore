@@ -2,9 +2,17 @@
 # LATAM e este repositorio e publico. O arquivo chega pelo canal da turma e
 # fica so na sua maquina.
 dados/*.csv
+dados/*.csv.gz
+dados/*.gz
 dados/*.xlsx
 dados/*.xls
 dados/*.parquet
+dados/*.pkl
+
+# Planilha de avaliacao da banca. Sao notas de aluno, e este repositorio e
+# publico. Ela apareceu no stage em 12/09/2026 porque o padrao acima so cobria
+# a pasta dados/ e ela estava na raiz.
+Avaliacao_Banca*.xlsx
 
 # Saida da analise: cada grupo gera a sua.
 figuras/*.png
@@ -36,3 +44,8 @@ perfil.md
 univariada.md
 bivariada.md
 registro-de-tratamento.md
+
+# Modelo treinado e escores: derivados, cada grupo gera os seus.
+app/modelo.joblib
+app/escores.csv
+dados/.cache/
