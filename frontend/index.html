@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de retenção Kovan &middot; MBA Inteli x Lenovo</title>
+  <!--
+    Painel da Aula 08. Uma página, sem build: carrega a planilha da fila,
+    guarda os planos de ação de cada área e conversa com o agente do n8n.
+
+    Para criar a versão do grupo: copie este arquivo e assets/css/inteli-brand.css
+    para a pasta frontend/ do repositório de prática (lá já existe uma cópia
+    pronta) e peça as mudanças ao Antigravity.
+
+    Nada é enviado a lugar nenhum além do endpoint que você configurar. A
+    planilha fica no navegador e segue junto com cada pergunta.
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&family=Platypi:wght@500&family=Space+Mono&display=swap">
+  <link rel="stylesheet" href="inteli-brand.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--seg-superficie); color: var(--seg-texto); font-size: 16px; }
+    header.topo {
+      background: var(--seg-primaria); color: var(--inteli-branco);
+      padding: 20px 32px; display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap;
+      border-bottom: 4px solid var(--seg-destaque);
+    }
+    header.topo h1 { margin: 0; font-size: 28px; color: var(--inteli-branco); }
+    header.topo p { margin: 0; font-size: 15px; }
+    main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px;
+           display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+    section.bloco { background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 20px 22px; }
+    .bloco h2 { margin: 0 0 4px; font-size: 21px; display: flex; gap: 12px; align-items: baseline; }
+    .bloco h2 .num { color: var(--seg-destaque); font-size: 15px; }
+    .bloco .ajuda { margin: 0 0 14px; font-size: 14px; }
+    label { display: block; font-weight: 600; font-size: 14px; margin: 10px 0 6px; }
+    input[type=url], input[type=text], textarea, select {
+      width: 100%; font: inherit; color: var(--seg-texto); background: var(--seg-base);
+      border: 1px solid var(--seg-borda); padding: 10px 12px;
+    }
+    textarea { min-height: 110px; resize: vertical; font-size: 14px; line-height: 1.45; }
+    input:focus, textarea:focus { outline: 2px solid var(--seg-secundaria); outline-offset: -1px; }
+    button {
+      font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px;
+      background: var(--seg-primaria); color: var(--inteli-branco);
+    }
+    button.secundario { background: var(--seg-base); color: var(--seg-primaria); border: 1px solid var(--seg-primaria); }
+    button:disabled { cursor: not-allowed; background: var(--seg-borda); color: var(--seg-texto); }
+    .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+    .status { font-size: 14px; }
+    .status.ok { color: var(--seg-secundaria); font-weight: 600; }
+    .status.erro { color: var(--seg-destaque); font-weight: 600; }
+    .soltar {
+      border: 2px dashed var(--seg-borda); padding: 22px; text-align: center; cursor: pointer;
+      background: var(--seg-superficie);
+    }
+    .soltar.ativo { border-color: var(--seg-secundaria); }
+    .soltar strong { display: block; font-size: 17px; margin-bottom: 4px; }
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+    @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .kpi { border-left: 4px solid var(--seg-secundaria); background: var(--seg-superficie); padding: 10px 12px; }
+    .kpi .v { font-size: 24px; font-weight: 500; margin: 0; white-space: nowrap; }
+    .kpi .r { font-size: 13px; margin: 2px 0 0; }
+    .tabela-rolagem { overflow-x: auto; margin-top: 14px; max-height: 300px; overflow-y: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--seg-borda); white-space: nowrap; }
+    th { position: sticky; top: 0; background: var(--seg-primaria); color: var(--inteli-branco); font-weight: 600; }
+    td.n { text-align: right; font-variant-numeric: tabular-nums; }
+    .abas { display: flex; gap: 0; border-bottom: 2px solid var(--seg-primaria); margin-top: 6px; }
+    .abas button { background: var(--seg-base); color: var(--seg-primaria); padding: 8px 16px; }
+    .abas button[aria-selected=true] { background: var(--seg-primaria); color: var(--inteli-branco); }
+    .aba { display: none; padding-top: 10px; }
+    .aba.ativa { display: block; }
+    .chat { display: flex; flex-direction: column; height: calc(100vh - 140px); min-height: 560px; position: sticky; top: 16px; }
+    .mensagens { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 12px; }
+    .msg { max-width: 88%; padding: 12px 14px; line-height: 1.5; white-space: pre-wrap; font-size: 15px; }
+    .msg.eu { align-self: flex-end; background: var(--seg-primaria); color: var(--inteli-branco); }
+    .msg.agente { align-self: flex-start; background: var(--seg-superficie); border-left: 4px solid var(--seg-secundaria); }
+    .msg.aviso { align-self: center; font-size: 13px; background: transparent; padding: 4px; }
+    .sugestoes { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .sugestoes button { font-size: 13px; font-weight: 500; padding: 6px 10px; }
+    .enviar { display: flex; gap: 8px; }
+    .enviar textarea { min-height: 52px; height: 52px; }
+    .pendente::after { content: "consultando o agente..."; }
+    footer { text-align: center; font-size: 13px; padding: 0 16px 32px; }
+  </style>
+</head>
+<body>
+  <header class="topo">
+    <h1>Painel de retenção Kovan LATAM</h1>
+    <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Aula 08</p>
+  </header>
+
+  <main>
+    <div class="coluna">
+      <section class="bloco" id="bloco-conexao">
+        <h2><span class="num">01</span>Conexão com o n8n</h2>
+        <p class="ajuda">A URL de produção do nó <em>API do painel</em> do workflow do grupo. O workflow precisa estar ativo.</p>
+        <label for="endpoint">Endpoint</label>
+        <input id="endpoint" type="url" placeholder="https://inteli.app.n8n.cloud/webhook/kovan-chat-NOME_DO_GRUPO">
+        <div class="linha">
+          <button id="testar" class="secundario" type="button">Testar conexão</button>
+          <span id="status-conexao" class="status"></span>
+        </div>
+      </section>
+
+      <section class="bloco" id="bloco-planilha">
+        <h2><span class="num">02</span>Planilha da fila</h2>
+        <p class="ajuda">O arquivo <code>saida/fila_publicada.csv</code> que <code>python -m app.publicar</code> grava. Aceita CSV, XLSX e JSON.</p>
+        <div class="soltar" id="soltar" tabindex="0" role="button">
+          <strong>Arraste a planilha aqui ou clique para escolher</strong>
+          <span id="nome-arquivo" class="status">Nenhum arquivo carregado</span>
+        </div>
+        <input id="arquivo" type="file" accept=".csv,.xlsx,.xls,.json" hidden>
+        <div id="resumo" hidden>
+          <div class="kpis">
+            <div class="kpi"><h4 class="v" id="k-contas">0</h4><p class="r">contas na planilha</p></div>
+            <div class="kpi"><h4 class="v" id="k-risco">-</h4><p class="r">valor em risco, USD</p></div>
+            <div class="kpi"><h4 class="v" id="k-esperado">-</h4><p class="r">valor esperado, USD</p></div>
+            <div class="kpi"><h4 class="v" id="k-escore">-</h4><p class="r">escore médio</p></div>
+          </div>
+          <div class="tabela-rolagem"><table id="tabela"></table></div>
+        </div>
+      </section>
+
+      <section class="bloco" id="bloco-planos">
+        <h2><span class="num">03</span>Planos de ação por área</h2>
+        <p class="ajuda">O agente só recomenda o que estiver escrito aqui. Os textos abaixo são exemplos: substitua pelo plano do grupo.</p>
+        <div class="abas" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-aba="comercial">Comercial</button>
+          <button type="button" role="tab" aria-selected="false" data-aba="atendimento">Atendimento</button>
+          <button type="button" role="tab" aria-selected="false" data-aba="posvendas">Pós-vendas</button>
+        </div>
+        <div class="aba ativa" data-aba="comercial"><textarea id="plano-comercial" aria-label="Plano da área comercial"></textarea></div>
+        <div class="aba" data-aba="atendimento"><textarea id="plano-atendimento" aria-label="Plano da área de atendimento"></textarea></div>
+        <div class="aba" data-aba="posvendas"><textarea id="plano-posvendas" aria-label="Plano da área de pós-vendas"></textarea></div>
+        <div class="linha"><button id="restaurar" class="secundario" type="button">Restaurar exemplos</button>
+          <span class="status">Os planos ficam salvos neste navegador.</span></div>
+      </section>
+    </div>
+
+    <div class="coluna">
+      <section class="bloco chat">
+        <h2><span class="num">04</span>Conversa com o agente</h2>
+        <p class="ajuda">A cada pergunta o painel envia a planilha e os três planos. O agente responde apoiado só nesse material.</p>
+        <div class="mensagens" id="mensagens" aria-live="polite">
+          <div class="msg aviso">Configure o endpoint e carregue a planilha para começar.</div>
+        </div>
+        <div class="sugestoes" id="sugestoes">
+          <button type="button" class="secundario">Quais as cinco primeiras contas da fila e por quê?</button>
+          <button type="button" class="secundario">Qual área deve atuar na primeira conta da fila, e com qual ação?</button>
+          <button type="button" class="secundario">Quanto a primeira conta comprou em 2025?</button>
+        </div>
+        <form class="enviar" id="form">
+          <textarea id="pergunta" placeholder="Pergunte sobre a fila, uma conta ou o plano de uma área" aria-label="Pergunta"></textarea>
+          <button id="enviar" type="submit">Enviar</button>
+        </form>
+      </section>
+    </div>
+  </main>
+  <footer>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia</footer>
+
+  <script>
+  (function () {
+    "use strict";
+    var LIMITE = 300;   // linhas enviadas por pergunta; acima disso a conversa fica cara e lenta
+    var PLANOS_EXEMPLO = {
+      comercial: "Exemplo, substitua pelo plano do grupo.\n1. Conta com valor esperado acima de USD 500 mil: ligação do Account Manager em até 5 dias úteis, com revisão do mix comprado nos últimos 12 meses.\n2. Conta com queda contra o pico abaixo de 0,5: proposta de renovação do parque instalado, sem desconto fora da tabela vigente.\n3. Nenhuma condição comercial é oferecida sem aprovação do gerente regional.",
+      atendimento: "Exemplo, substitua pelo plano do grupo.\n1. Conta com mais de 120 dias desde a última compra: contato do time de atendimento para verificar chamados abertos e satisfação.\n2. Conta com razão entre recência e cadência acima de 3: registrar no CRM o motivo informado pelo cliente.\n3. Escalar ao Comercial quando o cliente citar concorrente.",
+      posvendas: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 3 meses ou menos de compra nos últimos 12: revisão técnica do parque e da garantia.\n2. Conta com contrato de serviço a vencer em 90 dias: oferta de extensão de garantia pela tabela vigente.\n3. Registrar no CRM toda visita técnica feita a conta da fila."
+    };
+
+    var $ = function (id) { return document.getElementById(id); };
+    var contas = [];
+    var sessao = "painel-" + Math.random().toString(36).slice(2, 10);
+
+    function ler(chave) { try { return localStorage.getItem(chave); } catch (e) { return null; } }
+    function gravar(chave, v) { try { localStorage.setItem(chave, v); } catch (e) { /* sem armazenamento */ } }
+
+    // ---- 01 conexão
+    $("endpoint").value = ler("kovan-endpoint") || "";
+    $("endpoint").addEventListener("change", function () { gravar("kovan-endpoint", this.value.trim()); });
+
+    function chamar(pergunta) {
+      var url = $("endpoint").value.trim();
+      if (!url) return Promise.reject(new Error("Configure o endpoint do n8n no bloco 01."));
+      return fetch(url, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: sessao, pergunta: pergunta,
+                               contas: contas.slice(0, LIMITE), planos: planos() })
+      }).then(function (r) {
+        if (!r.ok) throw new Error("O n8n respondeu " + r.status + ". Confira se o workflow está ativo e se a URL é a de produção.");
+        return r.json();
+      }).then(function (j) {
+        var item = Array.isArray(j) ? j[0] : j;
+        return (item && (item.resposta || item.output)) || JSON.stringify(j);
+      });
+    }
+
+    $("testar").addEventListener("click", function () {
+      var s = $("status-conexao");
+      s.className = "status"; s.textContent = "testando...";
+      chamar("Responda apenas: conexão ok.").then(function () {
+        s.className = "status ok"; s.textContent = "Conexão ok";
+      }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; });
+    });
+
+    // ---- 02 planilha
+    function numero(v) {
+      if (typeof v === "number") return v;
+      if (v === null || v === undefined || v === "") return NaN;
+      var t = String(v).trim();
+      // Vírgula presente: formato brasileiro, ponto é milhar ("1.234,5").
+      // Sem vírgula: ponto é decimal, que é o que o pandas grava ("0.448").
+      // Tratar "0.448" como milhar transformava o escore em 448.
+      if (t.indexOf(",") >= 0) t = t.replace(/\./g, "").replace(",", ".");
+      return t === "" ? NaN : Number(t);
+    }
+    function normalizar(linhas) {
+      return linhas.map(function (l) {
+        var o = {};
+        Object.keys(l).forEach(function (k) {
+          var n = numero(l[k]);
+          o[String(k).trim()] = isNaN(n) ? l[k] : n;
+        });
+        return o;
+      });
+    }
+    function carregar(arquivo) {
+      var leitor = new FileReader();
+      var nome = arquivo.name.toLowerCase();
+      leitor.onload = function (ev) {
+        try {
+          var linhas;
+          if (nome.endsWith(".json")) {
+            linhas = JSON.parse(ev.target.result);
+            if (!Array.isArray(linhas)) linhas = linhas.contas || [linhas];
+          } else {
+            if (typeof XLSX === "undefined") throw new Error("A biblioteca de planilha não carregou. Use CSV ou JSON.");
+            var wb = nome.endsWith(".csv")
+              ? XLSX.read(ev.target.result, { type: "string", raw: true })
+              : XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
+            linhas = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+          }
+          contas = normalizar(linhas);
+          resumir(arquivo.name);
+        } catch (e) {
+          $("nome-arquivo").className = "status erro";
+          $("nome-arquivo").textContent = "Não consegui ler o arquivo: " + e.message;
+        }
+      };
+      if (nome.endsWith(".xlsx") || nome.endsWith(".xls")) leitor.readAsArrayBuffer(arquivo);
+      else leitor.readAsText(arquivo, "utf-8");
+    }
+    var fmt = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+    function compacto(v) {
+      if (Math.abs(v) >= 1e6) return (v / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mi";
+      if (Math.abs(v) >= 1e3) return (v / 1e3).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mil";
+      return fmt.format(v);
+    }
+    function soma(col) {
+      if (!contas.length || !(col in contas[0])) return null;
+      return contas.reduce(function (a, l) { return a + (typeof l[col] === "number" ? l[col] : 0); }, 0);
+    }
+    function resumir(nome) {
+      var aviso = contas.length > LIMITE ? " (só as " + LIMITE + " primeiras seguem para o agente)" : "";
+      $("nome-arquivo").className = "status ok";
+      $("nome-arquivo").textContent = nome + ": " + contas.length + " linhas" + aviso;
+      $("resumo").hidden = false;
+      $("k-contas").textContent = fmt.format(contas.length);
+      var r = soma("valor_em_risco_usd"), e = soma("valor_esperado_usd"), s = soma("escore");
+      $("k-risco").textContent = r === null ? "-" : compacto(r);
+      $("k-esperado").textContent = e === null ? "-" : compacto(e);
+      $("k-escore").textContent = s === null ? "-" : (s / contas.length).toLocaleString("pt-BR", { maximumFractionDigits: 3 });
+      var cols = Object.keys(contas[0] || {});
+      var html = "<thead><tr>" + cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>";
+      contas.slice(0, 50).forEach(function (l) {
+        html += "<tr>" + cols.map(function (c) {
+          var v = l[c];
+          return typeof v === "number" ? '<td class="n">' + v.toLocaleString("pt-BR") + "</td>" : "<td>" + esc(v) + "</td>";
+        }).join("") + "</tr>";
+      });
+      $("tabela").innerHTML = html + "</tbody>";
+      aviso_chat("Planilha carregada: " + contas.length + " linhas.");
+    }
+    var zona = $("soltar");
+    zona.addEventListener("click", function () { $("arquivo").click(); });
+    zona.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") $("arquivo").click(); });
+    $("arquivo").addEventListener("change", function () { if (this.files[0]) carregar(this.files[0]); });
+    ["dragenter", "dragover"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add("ativo"); }); });
+    ["dragleave", "drop"].forEach(function (t) { zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove("ativo"); }); });
+    zona.addEventListener("drop", function (e) { if (e.dataTransfer.files[0]) carregar(e.dataTransfer.files[0]); });
+
+    // ---- 03 planos
+    var AREAS = ["comercial", "atendimento", "posvendas"];
+    AREAS.forEach(function (a) {
+      var t = $("plano-" + a);
+      t.value = ler("kovan-plano-" + a) || PLANOS_EXEMPLO[a];
+      t.addEventListener("input", function () { gravar("kovan-plano-" + a, t.value); });
+    });
+    function planos() {
+      return { comercial: $("plano-comercial").value, atendimento: $("plano-atendimento").value,
+               "pós-vendas": $("plano-posvendas").value };
+    }
+    $("restaurar").addEventListener("click", function () {
+      AREAS.forEach(function (a) { $("plano-" + a).value = PLANOS_EXEMPLO[a]; gravar("kovan-plano-" + a, PLANOS_EXEMPLO[a]); });
+    });
+    document.querySelectorAll(".abas button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
+        document.querySelectorAll(".aba").forEach(function (x) { x.classList.toggle("ativa", x.dataset.aba === b.dataset.aba); });
+      });
+    });
+
+    // ---- 04 chat
+    function esc(v) { return String(v).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+    function bolha(classe, texto) {
+      var d = document.createElement("div");
+      d.className = "msg " + classe; d.textContent = texto;
+      $("mensagens").appendChild(d); $("mensagens").scrollTop = $("mensagens").scrollHeight;
+      return d;
+    }
+    function aviso_chat(t) { bolha("aviso", t); }
+    function perguntar(texto) {
+      texto = texto.trim();
+      if (!texto) return;
+      if (!contas.length) { aviso_chat("Carregue a planilha no bloco 02 antes de perguntar."); return; }
+      bolha("eu", texto);
+      $("pergunta").value = "";
+      $("enviar").disabled = true;
+      var espera = bolha("agente pendente", "");
+      chamar(texto).then(function (r) {
+        espera.classList.remove("pendente"); espera.textContent = r;
+      }).catch(function (e) {
+        espera.className = "msg aviso"; espera.textContent = e.message;
+      }).then(function () { $("enviar").disabled = false; });
+    }
+    $("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar($("pergunta").value); });
+    $("pergunta").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); }
+    });
+    document.querySelectorAll("#sugestoes button").forEach(function (b) {
+      b.addEventListener("click", function () { perguntar(b.textContent); });
+    });
+  })();
+  </script>
+</body>
+</html>

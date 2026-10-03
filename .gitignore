@@ -49,3 +49,6 @@ registro-de-tratamento.md
 app/modelo.joblib
 app/escores.csv
 dados/.cache/
+
+# O painel da Aula 08 e codigo do grupo, e nao saida de analise.
+!frontend/*.html
