@@ -21,7 +21,10 @@ from __future__ import annotations
 import json
 import uuid
 
-MODELO_PADRAO = "openai/gpt-4o-mini"
+# Gratuito no OpenRouter (sufixo :free) e com suporte a ferramenta, testado em
+# 03/10/2026 no agente da fila e no painel. Plano gratuito: 20 requisições por
+# minuto e 50 por dia, por conta sem crédito comprado.
+MODELO_PADRAO = "nvidia/nemotron-3-super-120b-a12b:free"
 
 SISTEMA = """Você é o assistente da fila de retenção da Kovan Technologies LATAM. Quem conversa com você é um Account Manager.
 

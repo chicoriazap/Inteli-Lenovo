@@ -11,8 +11,10 @@ responde apoiado só nesse material.
 
 1. `python -m app.publicar --grupo NOME_DO_GRUPO` grava `saida/fila_publicada.csv`
    e `saida/workflow_n8n.json`.
-2. Importe o workflow no n8n, escolha a credencial OpenRouter nos dois nós
-   OpenRouter e ative.
+2. Crie uma chave gratuita em <https://openrouter.ai/settings/keys>, salve no
+   n8n em Credentials > Create credential > OpenRouter, importe o workflow,
+   escolha essa credencial nos dois nós OpenRouter e ative. O modelo padrão
+   termina em `:free`: 50 requisições por dia por conta, sem custo.
 3. No painel, cole a URL de produção do nó **API do painel**
    (`https://inteli.app.n8n.cloud/webhook/kovan-chat-NOME_DO_GRUPO`), carregue
    o CSV e escreva os planos de ação do grupo.
