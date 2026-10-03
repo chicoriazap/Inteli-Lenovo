@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Executivo de Retenção (Squad Expandido) &middot; MBA Inteli x Lenovo</title>
+  <title>Painel Executivo de Retenção & Customer Success &middot; MBA Inteli x Lenovo</title>
   <!--
-    Painel Executivo de Retenção Kovan LATAM - Versão Expandida com Squad de 5 Agentes de IA
-    - Atlas: Analista de Dados & Métricas
-    - Dante: Analista Financeiro & Valoração de Risco
-    - Vera: Estrategista de Playbooks & Réguas EWS
+    Painel Executivo de Retenção Kovan LATAM - Versão com Sub-Agentes Especializados de Customer Success (CS)
+    - CS-Onboard: Agente de Onboarding D+30 & Adoção Inicial
+    - CS-EWS: Agente Monitor de Ritmo & Recorrência (Gatilho P90)
+    - Dante: Agente de Valoração Financeira & Risco de Churn
     - Livia: Executive Storyteller & Pitch Narrativo
-    - Ciro: Revisor Executivo, Compliance & Guardião da Memória de Sessão
+    - Ciro: Agente Orquestrador Executivo, Compliance & Portador da Memória de Sessão
   -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Platypi:wght@500;600&family=Space+Mono&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
@@ -206,7 +206,7 @@
     .ews-card-subtitulo { font-size: 12.5px; font-weight: 700; color: #64748b; margin-bottom: 10px; }
     .ews-card ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.5; color: #334155; }
 
-    /* Chat do Squad de 5 Agentes de IA */
+    /* Chat do Squad de Sub-Agentes de CS */
     .chat { display: flex; flex-direction: column; height: calc(100vh - 120px); min-height: 720px; position: sticky; top: 16px; }
     .squad-header {
       display: flex;
@@ -230,7 +230,7 @@
       gap: 4px;
     }
 
-    /* Grid do Squad de 5 Agentes */
+    /* Grid do Squad de 5 Sub-Agentes de Customer Success */
     .equipe-squad {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -259,14 +259,14 @@
     }
     .agente-card .avatar-box .material-symbols-outlined { font-size: 20px; }
     
-    /* Cores distintivas por Agente */
-    .agente-card[data-agente=atlas] .avatar-box { background: #1b1233; }
-    .agente-card[data-agente=dante] .avatar-box { background: #0284c7; }
-    .agente-card[data-agente=vera] .avatar-box { background: #00d285; color: #1b1233; }
-    .agente-card[data-agente=livia] .avatar-box { background: #8b5cf6; }
-    .agente-card[data-agente=ciro] .avatar-box { background: #ff4545; }
+    /* Cores distintivas por Sub-Agente de Customer Success */
+    .agente-card[data-agente="cs-onboard"] .avatar-box { background: #00d285; color: #1b1233; }
+    .agente-card[data-agente="cs-ews"] .avatar-box { background: #0284c7; }
+    .agente-card[data-agente="dante"] .avatar-box { background: #1b1233; }
+    .agente-card[data-agente="livia"] .avatar-box { background: #8b5cf6; }
+    .agente-card[data-agente="ciro"] .avatar-box { background: #ff4545; }
 
-    .agente-card .nome { font-weight: 800; font-size: 13px; color: #1b1233; line-height: 1.1; }
+    .agente-card .nome { font-weight: 800; font-size: 12.5px; color: #1b1233; line-height: 1.1; }
     .agente-card .papel { font-size: 10.5px; color: #64748b; margin-top: 2px; font-weight: 600; }
     .agente-card .estado { font-size: 10.5px; font-weight: 700; margin-top: 4px; color: #94a3b8; display: flex; align-items: center; gap: 2px; }
 
@@ -284,10 +284,11 @@
     .msg.eu { align-self: flex-end; background: #1b1233; color: #ffffff; border-bottom-right-radius: 2px; }
     
     .msg.agente-msg { align-self: flex-start; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #1b1233; border-bottom-left-radius: 2px; }
-    .msg.agente-msg[data-agente=dante] { border-left-color: #0284c7; }
-    .msg.agente-msg[data-agente=vera] { border-left-color: #00d285; }
-    .msg.agente-msg[data-agente=livia] { border-left-color: #8b5cf6; background: #fbfbfe; }
-    .msg.agente-msg[data-agente=ciro] { border-left-color: #ff4545; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .msg.agente-msg[data-agente="cs-onboard"] { border-left-color: #00d285; }
+    .msg.agente-msg[data-agente="cs-ews"] { border-left-color: #0284c7; }
+    .msg.agente-msg[data-agente="dante"] { border-left-color: #1b1233; }
+    .msg.agente-msg[data-agente="livia"] { border-left-color: #8b5cf6; background: #fbfbfe; }
+    .msg.agente-msg[data-agente="ciro"] { border-left-color: #ff4545; background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 
     .msg .quem { display: flex; gap: 6px; align-items: center; font-weight: 800; font-size: 12.5px; margin-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px; }
     .msg .quem small { font-weight: 600; color: #64748b; font-size: 11px; }
@@ -315,20 +316,20 @@
       <div>
         <h1>
           <span class="material-symbols-outlined" style="font-size:30px; color:#00d285">hub</span>
-          Painel Executivo de Retenção Kovan LATAM
+          Painel Executivo de Retenção & Customer Success
         </h1>
-        <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Sistema Multi-Agente Avançado</p>
+        <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Sub-Agentes Especializados de CS</p>
       </div>
       <div class="badge-squad">
         <span class="material-symbols-outlined" style="font-size:16px">psychology</span>
-        Squad de 5 Agentes de IA
+        Sub-Agentes Customer Success
       </div>
     </div>
     <nav class="trilha" aria-label="Passos do painel"><ol>
       <li id="t1"><span class="n">1</span>Planilha & Modelo</li>
       <li id="t2"><span class="n">2</span>Réguas EWS</li>
       <li id="t3"><span class="n">3</span>Conexão n8n</li>
-      <li id="t4"><span class="n">4</span>Squad de IA</li>
+      <li id="t4"><span class="n">4</span>Squad CS</li>
     </ol></nav>
   </header>
 
@@ -409,7 +410,7 @@
             </div>
           </div>
 
-          <!-- Gráficos Visualização -->
+          <!-- Gráficos Visualização com explicação -->
           <div class="graficos-executivos">
             <div class="grafico-card">
               <div class="grafico-topo">
@@ -419,6 +420,18 @@
               <div style="height: 240px; position:relative;">
                 <canvas id="chart-matriz"></canvas>
               </div>
+              <!-- Texto Explicativo do Gráfico -->
+              <div style="margin-top:14px; padding:12px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; font-size:12px; color:#475569; line-height:1.5;">
+                <strong style="color:#1b1233; display:flex; align-items:center; gap:5px; margin-bottom:6px; font-size:12.5px;">
+                  <span class="material-symbols-outlined" style="font-size:16px; color:#0284c7">info</span>
+                  Como interpretar esta Matriz de Decisão:
+                </strong>
+                <ul style="margin:0; padding-left:18px;">
+                  <li><strong>Eixo X (Escore de Perda %)</strong>: Probabilidade estimada pelo modelo de a conta interromper as compras (0% = totalmente segura, 100% = churn iminente).</li>
+                  <li><strong>Eixo Y (Receita 12M em Risco)</strong>: Volume acumulado de faturamento em dólares da conta nos últimos 12 meses.</li>
+                  <li><strong>Tamanho da Bolha (Valor Esperado)</strong>: Produto do Escore pela Receita ($\text{Escore} \times \text{Receita}$). Quanto maior a bolha no canto superior direito, maior a prioridade de retenção do Customer Success.</li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -427,11 +440,11 @@
       </section>
 
       <section class="bloco" id="bloco-planos">
-        <h2><span class="num">02</span>Réguas EWS & Playbooks de Ação</h2>
+        <h2><span class="num">02</span>Réguas EWS & Planos de Ação</h2>
         <div class="ews-cards">
           <div class="ews-card">
             <div class="ews-card-titulo coral">RÉGUA 1: ONBOARDING D+30</div>
-            <div class="ews-card-subtitulo">Foco: Novos Compradores</div>
+            <div class="ews-card-subtitulo">Sub-Agente: CS-Onboard</div>
             <ul>
               <li>Jornada automática de CS após a primeira entrega.</li>
               <li>Validação técnica em D+15 e oferta de 2ª compra em D+30.</li>
@@ -439,7 +452,7 @@
           </div>
           <div class="ews-card">
             <div class="ews-card-titulo coral">RÉGUA 2: GATILHO DINÂMICO P90</div>
-            <div class="ews-card-subtitulo">Foco: Recorrência Ativa</div>
+            <div class="ews-card-subtitulo">Sub-Agente: CS-EWS</div>
             <ul>
               <li>Alertas ERP baseados no ritmo por segmento.</li>
               <li>Enterprise: Alerta vermelho com 90 dias sem compras.</li>
@@ -447,9 +460,9 @@
           </div>
           <div class="ews-card">
             <div class="ews-card-titulo cyan">RÉGUA 3: PIPELINE GAP CRM</div>
-            <div class="ews-card-subtitulo">Foco: Strategic Accounts</div>
+            <div class="ews-card-subtitulo">Sub-Agentes: Dante & Livia</div>
             <ul>
-              <li>Monitoramento contínuo no CRM.</li>
+              <li>Valoração financeira de risco e Pitch C-Level.</li>
               <li>Disparo imediato para Diretoria com 90 dias sem propostas.</li>
             </ul>
           </div>
@@ -457,9 +470,9 @@
       </section>
 
       <section class="bloco" id="bloco-conexao">
-        <h2><span class="num">03</span>Conexão n8n (Squad Expandido)</h2>
-        <p class="ajuda">Baixe o workflow de 5 agentes, importe no n8n e insira o Endpoint do Webhook abaixo.</p>
-        <a class="botao" href="frontend/workflow_n8n_expandido.json" download="kovan-squad-5-agentes.json"><span class="material-symbols-outlined">download</span>Baixar Workflow n8n (5 Agentes)</a>
+        <h2><span class="num">03</span>Conexão n8n (Sub-Agentes CS)</h2>
+        <p class="ajuda">Baixe o workflow de 5 sub-agentes de CS, importe no n8n e insira o Endpoint do Webhook abaixo.</p>
+        <a class="botao" href="frontend/workflow_n8n_expandido.json" download="kovan-squad-cs-5-agentes.json"><span class="material-symbols-outlined">download</span>Baixar Workflow n8n (Sub-Agentes CS)</a>
         <label for="endpoint">Endpoint do Webhook</label>
         <input id="endpoint" type="url" placeholder="https://inteli.app.n8n.cloud/webhook/kovan-chat-NOME_DO_GRUPO">
         <div class="linha">
@@ -474,32 +487,32 @@
         <div class="squad-header">
           <div class="squad-titulo">
             <span class="material-symbols-outlined" style="color:#00d285">forum</span>
-            <span>Squad de Retenção & Storytelling</span>
+            <span>Squad de Sub-Agentes de Customer Success</span>
           </div>
-          <div class="memoria-badge" title="Ciro é o guardião oficial do contexto e histórico de mensagens">
+          <div class="memoria-badge" title="Ciro é o guardião oficial do contexto, orquestração e histórico da sessão">
             <span class="material-symbols-outlined" style="font-size:14px">memory</span>
             Memória: Ciro (Portador)
           </div>
         </div>
 
-        <!-- Equipe de 5 Agentes -->
+        <!-- Equipe de 5 Sub-Agentes de Customer Success -->
         <div class="equipe-squad">
-          <div class="agente-card" data-agente="atlas">
-            <div class="avatar-box"><span class="material-symbols-outlined">query_stats</span></div>
-            <span class="nome">Atlas</span>
-            <span class="papel">Análise & Métricas</span>
+          <div class="agente-card" data-agente="cs-onboard">
+            <div class="avatar-box"><span class="material-symbols-outlined">rocket_launch</span></div>
+            <span class="nome">CS-Onboard</span>
+            <span class="papel">Onboarding D+30</span>
+            <span class="estado">aguardando</span>
+          </div>
+          <div class="agente-card" data-agente="cs-ews">
+            <div class="avatar-box"><span class="material-symbols-outlined">speed</span></div>
+            <span class="nome">CS-EWS</span>
+            <span class="papel">Monitor P90</span>
             <span class="estado">aguardando</span>
           </div>
           <div class="agente-card" data-agente="dante">
             <div class="avatar-box"><span class="material-symbols-outlined">monetization_on</span></div>
             <span class="nome">Dante</span>
             <span class="papel">Valoração & Risco</span>
-            <span class="estado">aguardando</span>
-          </div>
-          <div class="agente-card" data-agente="vera">
-            <div class="avatar-box"><span class="material-symbols-outlined">flag</span></div>
-            <span class="nome">Vera</span>
-            <span class="papel">Playbook & Ações</span>
             <span class="estado">aguardando</span>
           </div>
           <div class="agente-card" data-agente="livia">
@@ -511,7 +524,7 @@
           <div class="agente-card" data-agente="ciro">
             <div class="avatar-box"><span class="material-symbols-outlined">fact_check</span></div>
             <span class="nome">Ciro</span>
-            <span class="papel">Revisor & Memória</span>
+            <span class="papel">Orquestrador & Memória</span>
             <span class="estado">aguardando</span>
           </div>
         </div>
@@ -533,17 +546,17 @@
         </div>
 
         <div class="mensagens" id="mensagens" aria-live="polite">
-          <div class="msg aviso">Carregue a planilha e conecte o n8n para iniciar a consulta ao Squad.</div>
+          <div class="msg aviso">Carregue a planilha e conecte o n8n para iniciar a consulta ao Squad de CS.</div>
         </div>
 
         <div class="sugestoes" id="sugestoes">
-          <button type="button" class="secundario">Quais as 3 primeiras contas em risco e a história por trás delas?</button>
-          <button type="button" class="secundario">Qual a viabilidade financeira de salvar a 1ª conta da fila?</button>
-          <button type="button" class="secundario">Monte um Pitch Executivo completo para o Account Manager da 1ª conta.</button>
+          <button type="button" class="secundario">Quais as 3 primeiras contas da Régua 1 (Onboarding D+30)?</button>
+          <button type="button" class="secundario">Qual o risco financeiro e orçamento de retenção para a 1ª conta?</button>
+          <button type="button" class="secundario">Gere um Pitch Executivo completo de renovação para o Account Manager.</button>
         </div>
 
         <form class="enviar" id="form">
-          <textarea id="pergunta" placeholder="Pergunte ao Squad sobre contas, pitch executivo ou simulação financeira..." aria-label="Pergunta"></textarea>
+          <textarea id="pergunta" placeholder="Pergunte aos sub-agentes de CS sobre onboarding, gatilho P90, valor em risco ou pitch..." aria-label="Pergunta"></textarea>
           <button id="enviar" type="submit"><span class="material-symbols-outlined">send</span>Enviar</button>
         </form>
       </section>
@@ -558,17 +571,17 @@
   <script>
   (function () {
     "use strict";
-    var AGENTES = ["atlas", "dante", "vera", "livia", "ciro"];
+    var AGENTES = ["cs-onboard", "cs-ews", "dante", "livia", "ciro"];
     var PLANOS_EXEMPLO = {
-      atendimento: "RÉGUA 1: ONBOARDING D+30 (Novos Compradores)\n- CS automático pós-primeira entrega.\n- Validação técnica D+15 e 2ª compra D+30.",
-      posvendas: "RÉGUA 2: GATILHO DINÂMICO P90 (Recorrência)\n- Alertas ERP baseados no ritmo por segmento.\n- Enterprise: Alerta vermelho com 90 dias sem compras.",
-      comercial: "RÉGUA 3: PIPELINE GAP CRM (Strategic Accounts)\n- Monitoramento continuo no CRM.\n- Alerta Diretoria com 90 dias sem propostas."
+      atendimento: "RÉGUA 1: ONBOARDING D+30 (Novos Compradores - Sub-Agente CS-Onboard)\n- CS automático pós-primeira entrega.\n- Validação técnica D+15 e 2ª compra D+30.",
+      posvendas: "RÉGUA 2: GATILHO DINÂMICO P90 (Recorrência - Sub-Agente CS-EWS)\n- Alertas ERP baseados no ritmo por segmento.\n- Enterprise: Alerta vermelho com 90 dias sem compras.",
+      comercial: "RÉGUA 3: PIPELINE GAP CRM (Strategic Accounts - Dante & Livia)\n- Valoração financeira de risco e Pitch Executivo.\n- Alerta Diretoria com 90 dias sem propostas."
     };
 
     var $ = function (id) { return document.getElementById(id); };
     var linhas = [];
     var resultado = null;
-    var sessao = "squad-expandido-" + Math.random().toString(36).slice(2, 10);
+    var sessao = "squad-cs-" + Math.random().toString(36).slice(2, 10);
     var espera = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
     var fmt = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
     function dec(v, n) { return v.toLocaleString("pt-BR", { minimumFractionDigits: n, maximumFractionDigits: n }); }
@@ -813,7 +826,7 @@
     }
 
     function mensagemAgente(a) {
-      var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
+      var nome = String(a.nome || "Agente"), chave = nome.toLowerCase().replace(/[^a-z0-9\-]/g, "");
       var d = document.createElement("div");
       d.className = "msg agente-msg"; d.dataset.agente = chave;
       var texto = String(a.texto || "");
@@ -823,12 +836,13 @@
         var corr = m[1].toLowerCase() === "corrigido";
         selo = '<span class="selo' + (corr ? " corrigido" : "") + '">' + (corr ? "corrigido" : "aprovado") + '</span>';
         texto = texto.slice(m[0].length);
-      } else if (chave === "ciro") {
+      } else if (chave.indexOf("ciro") >= 0) {
         selo = '<span class="selo memoria"><span class="material-symbols-outlined" style="font-size:12px">memory</span> memória salva</span>';
       }
       
-      var icones = { atlas: "query_stats", dante: "monetization_on", vera: "flag", livia: "record_voice_over", ciro: "fact_check" };
-      d.innerHTML = '<div class="quem"><span class="material-symbols-outlined" style="font-size:16px">' + (icones[chave] || "smart_toy") + '</span> ' +
+      var icones = { "cs-onboard": "rocket_launch", "cs-ews": "speed", dante: "monetization_on", livia: "record_voice_over", ciro: "fact_check" };
+      var iconName = icones[chave] || "smart_toy";
+      d.innerHTML = '<div class="quem"><span class="material-symbols-outlined" style="font-size:16px">' + iconName + '</span> ' +
                     esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + selo + '</div><div class="corpo">' + esc(texto) + '</div>';
       $("mensagens").appendChild(d);
       $("mensagens").scrollTop = $("mensagens").scrollHeight;
@@ -849,7 +863,7 @@
       var s = $("status-conexao");
       s.className = "status"; s.textContent = "Testando conexão...";
       chamar("Teste de conexão.").then(function () {
-        s.className = "status ok"; s.textContent = "Squad de 5 Agentes Conectado!"; trilha();
+        s.className = "status ok"; s.textContent = "Squad de CS Conectado!"; trilha();
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
 
@@ -863,13 +877,13 @@
       var parar = animarSquad(), t0 = performance.now();
       chamar(texto).then(function (r) {
         parar();
-        var agentes = r && r.agentes ? r.agentes : [{ nome: "Squad", papel: "", texto: JSON.stringify(r) }];
+        var agentes = r && r.agentes ? r.agentes : [{ nome: "Squad CS", papel: "", texto: JSON.stringify(r) }];
         agentes.forEach(function (a) {
-          var chave = String(a.nome || "").toLowerCase();
+          var chave = String(a.nome || "").toLowerCase().replace(/[^a-z0-9\-]/g, "");
           if (AGENTES.indexOf(chave) >= 0) estadoAgente(chave, "pronto");
           mensagemAgente(a);
         });
-        bolha("rodape", "Processado em " + Math.round((performance.now() - t0) / 1000) + "s pelo Squad");
+        bolha("rodape", "Processado em " + Math.round((performance.now() - t0) / 1000) + "s pelo Squad de CS");
       }).catch(function (e) {
         parar();
         AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
