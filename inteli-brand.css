@@ -1,0 +1,71 @@
+/* Tokens do Brandbook Inteli 2025. */
+:root {
+  --inteli-roxo: #2e2640;
+  --inteli-coral: #ff4545;
+  --inteli-verde-escuro: #066d73;
+  --inteli-cinza-escuro: #b2b6bf;
+  --inteli-cinza-medio: #caced6;
+  --inteli-cinza-claro: #e6eaeb;
+  --inteli-branco: #ffffff;
+
+  --seg-base: var(--inteli-branco);
+  --seg-superficie: var(--inteli-cinza-claro);
+  --seg-borda: var(--inteli-cinza-medio);
+  --seg-primaria: var(--inteli-roxo);
+  --seg-secundaria: var(--inteli-verde-escuro);
+  --seg-destaque: var(--inteli-coral);
+  --seg-texto: var(--inteli-roxo);
+  --seg-texto-suave: var(--inteli-cinza-escuro);
+  --seg-texto-sobre-secundaria: var(--inteli-branco);
+
+  --fonte-titulo: "Platypi", Georgia, serif;
+  --fonte-texto: "Manrope", system-ui, sans-serif;
+  --fonte-mono: "Space Mono", monospace;
+
+  --escala-titulo: 44px;
+  --escala-subtitulo: 26px;
+  --escala-texto: 20px;
+  --escala-complementar: 15px;
+}
+
+body {
+  font-family: var(--fonte-texto);
+  font-size: var(--escala-texto);
+}
+
+h1, h2 {
+  font-family: var(--fonte-titulo);
+  font-weight: 500;
+  font-size: var(--escala-titulo);
+}
+
+h3, h4 {
+  font-family: var(--fonte-titulo);
+  font-weight: 500;
+  font-size: var(--escala-subtitulo);
+}
+
+code, pre, kbd, samp, .mono {
+  font-family: var(--fonte-mono);
+  font-size: var(--escala-complementar);
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.portal { font-family: var(--fonte-texto); }
+body.portal h1, body.portal h3, body.portal h4, body.portal th { font-family: var(--fonte-titulo); }
+body.portal .eyebrow { font-family: var(--fonte-mono); }
+:root { --seg-cinza-linha: color-mix(in srgb, var(--inteli-roxo) 28%, var(--inteli-branco)); }
