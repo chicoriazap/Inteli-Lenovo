@@ -1,43 +1,52 @@
 # frontend: o painel do grupo
 
-Uma página só, sem build. Carrega a planilha da fila, guarda os planos de ação
-de cada área (Comercial, Atendimento, Pós-vendas) e conversa com o agente do
-n8n. A cada pergunta ela envia ao n8n a planilha e os três planos, e o agente
-responde apoiado só nesse material.
+Uma página só, sem build e sem instalação. Ela lê a planilha original do case
+(`datasets_case_modulo2.xlsx`, a base longa de cerca de 68 MB), treina uma
+regressão logística dentro do navegador, monta a fila do ciclo e conversa com
+uma equipe de três agentes no n8n:
 
-## Usar a versão pronta
+- **Atlas**, analista da fila, responde com os números;
+- **Vera**, estrategista, recomenda a ação pelos planos de cada área;
+- **Ciro**, revisor, confere cada número e dá o veredito.
 
-<https://josercf.github.io/inteli-2026-2-pos-m02/painel/>
+O guia completo, passo a passo e com os prompts do Antigravity, está em
+<https://josercf.github.io/inteli-2026-2-pos-m02/materiais/aula08-guia.html>.
 
-1. `python -m app.publicar --grupo NOME_DO_GRUPO` grava `saida/fila_publicada.csv`
-   e `saida/workflow_n8n.json`.
-2. Crie uma chave gratuita em <https://openrouter.ai/settings/keys>, salve no
-   n8n em Credentials > Create credential > OpenRouter, importe o workflow,
-   escolha essa credencial nos dois nós OpenRouter e ative. O modelo padrão
-   termina em `:free`: 50 requisições por dia por conta, sem custo.
-3. No painel, cole a URL de produção do nó **API do painel**
-   (`https://inteli.app.n8n.cloud/webhook/kovan-chat-NOME_DO_GRUPO`), carregue
-   o CSV e escreva os planos de ação do grupo.
+## Arquivos
 
-## Criar a versão do grupo
+| Arquivo | Papel |
+|---|---|
+| `index.html` | a tela |
+| `modelo.js` | o modelo: colunas por conta, regressão logística, fila |
+| `inteli-brand.css` | as cores e fontes da marca |
+| `workflow_n8n.json` | a equipe de agentes, para importar no n8n |
 
-Abra esta pasta no Antigravity e peça a mudança. Exemplos de pedido:
+Esta pasta é gerada a partir de `painel/` do acervo da disciplina, por
+`tools/exportar_frontend_aula08.py`. Modifique à vontade na cópia do grupo.
 
-- "Acrescente um gráfico de barras com as dez contas de maior valor esperado."
-- "Mostre, ao clicar numa linha da tabela, a conta com os quatro sinais."
-- "Acrescente uma quarta área, Financeiro, e mande o plano dela ao n8n."
+## Rodar na sua máquina
 
-Para abrir: `python -m http.server 8000` nesta pasta e
-<http://localhost:8000>. O n8n aceita a chamada de qualquer origem
-(`allowedOrigins: *` no nó API do painel).
-
-Contrato com o n8n, que qualquer versão precisa manter:
-
-```json
-POST { "sessionId": "...", "pergunta": "...", "contas": [ ... ], "planos": { "comercial": "...", "atendimento": "...", "pós-vendas": "..." } }
-200  { "resposta": "..." }
+```bash
+cd frontend
+python3 -m http.server 8000      # abra http://localhost:8000
 ```
 
-A planilha fica no navegador e só sai para o endpoint configurado. A fila tem
-identificador anonimizado e nenhum dado de cadastro, e mesmo assim a URL do
-n8n é pública: não divulgue fora da turma.
+## O contrato com o n8n
+
+Qualquer versão do painel precisa manter o formato que vai e volta, porque os
+três agentes dependem dele:
+
+```json
+POST { "sessionId": "...", "pergunta": "...", "modelo_llm": "nvidia/nemotron-3-super-120b-a12b:free",
+       "modelo": { "contas_elegiveis": 4593, "auc_fora_da_amostra": 0.8138, ... },
+       "contas": [ { "posicao_na_fila": 1, "account_id": "...", "escore_de_perda": 0.347, ... } ],
+       "planos": { "comercial": "...", "atendimento": "...", "pós-vendas": "..." } }
+
+200  { "modelo": "...", "agentes": [ { "nome": "Atlas", "papel": "...", "texto": "..." }, ... ] }
+```
+
+## O que nunca entra no repositório do grupo
+
+A planilha, a chave do OpenRouter e notas de avaliação. O painel lê a planilha
+dentro do navegador e envia ao n8n só a fila de 138 contas, com identificador
+anonimizado.
