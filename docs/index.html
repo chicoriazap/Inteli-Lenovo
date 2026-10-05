@@ -316,7 +316,7 @@
       <div>
         <h1>
           <span class="material-symbols-outlined" style="font-size:30px; color:#00d285">hub</span>
-          Painel Executivo de Retenção & Customer Success
+          Painel de retenção Kovan, grupo 3
         </h1>
         <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Sub-Agentes Especializados de CS</p>
       </div>
@@ -360,6 +360,19 @@
             <div class="kpi"><h4 class="v" id="k-auc">-</h4><p class="r">AUC fora da amostra</p></div>
             <div class="kpi"><h4 class="v" id="k-acertos">-</h4><p class="r">perdidas na fila</p></div>
             <div class="kpi"><h4 class="v" id="k-esperado">-</h4><p class="r">valor esperado fila</p></div>
+          </div>
+
+          <!-- Gráfico SVG Top 10 por Valor Esperado -->
+          <div class="top10-grafico-card" style="margin-top:16px; background:var(--seg-base); border:1px solid var(--seg-borda); border-radius:8px; padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+              <div>
+                <h4 style="margin:0; font-size:14px; font-weight:700; color:var(--seg-primaria);">Top 10 contas por maior valor esperado da fila</h4>
+                <p style="margin:2px 0 0; font-size:12px; color:var(--seg-texto-suave);">Valor esperado em risco (USD) na fila de retenção</p>
+              </div>
+            </div>
+            <div style="width:100%; overflow-x:auto;">
+              <svg id="top10-svg" viewBox="0 0 620 270" style="width:100%; max-width:620px; height:auto; display:block;" aria-label="Gráfico de barras horizontais em SVG com as dez contas de maior valor esperado da fila"></svg>
+            </div>
           </div>
 
           <!-- Filtros Executivos de Decisão -->
@@ -433,6 +446,20 @@
                 </ul>
               </div>
             </div>
+          <!-- Seletor de Segmento e Exportação CSV acima da Tabela da Fila -->
+          <div class="tabela-controles" style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="filtro-segmento-tabela" style="margin:0; font-size:12.5px; font-weight:700; color:var(--seg-primaria);">Segmento da Fila:</label>
+              <select id="filtro-segmento-tabela" style="width:auto; padding:6px 12px; font-size:12.5px; background:var(--seg-base); border:1px solid var(--seg-borda); border-radius:6px; color:var(--seg-texto);">
+                <option value="">Todos os segmentos</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span id="info-contas-tabela" style="font-size:12px; color:var(--seg-texto-suave);"></span>
+              <button type="button" id="btn-exportar-csv" class="secundario" style="font-size:12px; padding:6px 12px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                <span class="material-symbols-outlined" style="font-size:16px;">download</span> Baixar fila em CSV
+              </button>
+            </div>
           </div>
 
           <div class="tabela-rolagem"><table id="tabela"></table></div>
@@ -440,7 +467,7 @@
       </section>
 
       <section class="bloco" id="bloco-planos">
-        <h2><span class="num">02</span>Réguas EWS & Planos de Ação</h2>
+        <h2><span class="num">02</span>Réguas EWS & Playbooks de Ação</h2>
         <div class="ews-cards">
           <div class="ews-card">
             <div class="ews-card-titulo coral">RÉGUA 1: ONBOARDING D+30</div>
@@ -462,7 +489,7 @@
             <div class="ews-card-titulo cyan">RÉGUA 3: PIPELINE GAP CRM</div>
             <div class="ews-card-subtitulo">Sub-Agentes: Dante & Livia</div>
             <ul>
-              <li>Valoração financeira de risco e Pitch C-Level.</li>
+              <li>Valoração financeira e Pitch C-Level.</li>
               <li>Disparo imediato para Diretoria com 90 dias sem propostas.</li>
             </ul>
           </div>
@@ -564,7 +591,8 @@
   </main>
 
   <footer style="text-align:center; font-size:13px; padding:0 16px 32px; color:#64748b;">
-    Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia e Vendas B2B
+    <div>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia e Vendas B2B</div>
+    <div style="margin-top:6px; font-weight:600; color:#475569;">Eliziane Alves, Lilian Queiroz, Juliano Tungs, Gabriel Mancini, Uara Sales, Vinicius Neri e Yu Jun</div>
   </footer>
 
   <script src="modelo.js"></script>
@@ -680,15 +708,52 @@
       trilha();
     }
 
+    function renderizarTop10SVG(fila) {
+      var svg = $("top10-svg");
+      if (!svg || !fila || !fila.length) return;
+      var top10 = fila.slice().sort(function (a, b) {
+        return (b.valor_esperado || 0) - (a.valor_esperado || 0);
+      }).slice(0, 10);
+
+      var maxVal = Math.max.apply(null, top10.map(function (c) { return c.valor_esperado || 0; })) || 1;
+      var larguraBarraMax = 320;
+      var inicioX = 110;
+      var yOffset = 18;
+      var linhaAltura = 25;
+      var barraH = 15;
+
+      var conteudo = '<g class="top10-barras">';
+      top10.forEach(function (c, i) {
+        var y = yOffset + i * linhaAltura;
+        var valor = c.valor_esperado || 0;
+        var w = Math.max(4, Math.round((valor / maxVal) * larguraBarraMax));
+        var labelConta = c.account_id || ("#" + (i + 1));
+        var valorFmt = "USD " + fmt.format(valor);
+        var corBarra = c.churn === 1 ? "var(--seg-destaque)" : "var(--seg-secundaria)";
+
+        conteudo += '<rect x="' + inicioX + '" y="' + y + '" width="' + larguraBarraMax + '" height="' + barraH + '" rx="3" fill="var(--seg-superficie)"></rect>';
+        conteudo += '<rect x="' + inicioX + '" y="' + y + '" width="' + w + '" height="' + barraH + '" rx="3" fill="' + corBarra + '"><title>' + esc(labelConta) + ': ' + esc(valorFmt) + '</title></rect>';
+        conteudo += '<text x="' + (inicioX - 8) + '" y="' + (y + 11) + '" text-anchor="end" fill="var(--seg-texto)" font-family="var(--fonte-mono)" font-size="11" font-weight="600">' + esc(labelConta) + '</text>';
+        conteudo += '<text x="' + (inicioX + w + 8) + '" y="' + (y + 11) + '" text-anchor="start" fill="var(--seg-primaria)" font-family="var(--fonte-mono)" font-size="11" font-weight="700">' + esc(valorFmt) + '</text>';
+      });
+      conteudo += '</g>';
+      svg.innerHTML = conteudo;
+    }
+
     var chartMatriz = null;
 
     function inicializarFiltrosEChart() {
       if (!resultado || !resultado.fila) return;
+      renderizarTop10SVG(resultado.fila);
       var selSeg = $("filtro-segmento");
+      var selSegTab = $("filtro-segmento-tabela");
       var segs = {};
       resultado.fila.forEach(function (c) { if (c.segment) segs[c.segment] = true; });
-      selSeg.innerHTML = '<option value="">Todos os segmentos</option>' +
+      var opcoes = '<option value="">Todos os segmentos</option>' +
         Object.keys(segs).sort().map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join("");
+      
+      if (selSeg) selSeg.innerHTML = opcoes;
+      if (selSegTab) selSegTab.innerHTML = opcoes;
       
       aplicarFiltrosEAtualizar();
     }
@@ -725,8 +790,14 @@
     $("filtro-regua").addEventListener("change", aplicarFiltrosEAtualizar);
     $("filtro-risco").addEventListener("change", aplicarFiltrosEAtualizar);
     $("filtro-busca").addEventListener("input", aplicarFiltrosEAtualizar);
+    if ($("filtro-segmento-tabela")) {
+      $("filtro-segmento-tabela").addEventListener("change", function () {
+        aplicarFiltrosEAtualizar();
+      });
+    }
     $("btn-limpar-filtros").addEventListener("click", function () {
       $("filtro-segmento").value = "";
+      if ($("filtro-segmento-tabela")) $("filtro-segmento-tabela").value = "";
       $("filtro-regua").value = "";
       $("filtro-risco").value = "";
       $("filtro-busca").value = "";
@@ -781,14 +852,58 @@
     }
 
     function renderTabela(lista) {
+      var segTab = $("filtro-segmento-tabela") ? $("filtro-segmento-tabela").value : "";
+      var listaExibida = segTab ? lista.filter(function (c) { return c.segment === segTab; }) : lista;
+
       var html = '<thead><tr><th>#</th><th>Conta</th><th>Segmento</th><th>País</th><th class="n">Escore</th><th class="n">Receita 12M</th><th class="n">Perda Esperada</th></tr></thead><tbody>';
-      lista.slice(0, 50).forEach(function (c) {
+      listaExibida.slice(0, 50).forEach(function (c) {
         html += '<tr class="' + (c.churn === 1 ? "perdida" : "") + '"><td>' + c.posicao + '</td><td><strong>' + esc(c.account_id) + '</strong></td><td>' +
                 esc(c.segment || "-") + '</td><td>' + esc(c.country || "-") + '</td><td class="n">' + dec(c.escore, 2) + '</td><td class="n">$' +
                 compacto(c.valor_em_risco) + '</td><td class="n"><strong>$' + compacto(c.valor_esperado) + '</strong></td></tr>';
       });
       html += '</tbody>';
       $("tabela").innerHTML = html;
+
+      var infoEl = $("info-contas-tabela");
+      if (infoEl) {
+        infoEl.textContent = "Exibindo " + Math.min(50, listaExibida.length) + " de " + listaExibida.length + " contas filtradas (" + (resultado ? resultado.fila.length : 0) + " na fila total)";
+      }
+    }
+
+    function exportarFilaCSV() {
+      if (!resultado || !resultado.fila || !resultado.fila.length) {
+        alert("Carregue e processe a planilha primeiro para gerar a fila.");
+        return;
+      }
+      var cabecalho = ["#", "Conta", "Segmento", "Pais", "Escore", "Receita_12M_USD", "Perda_Esperada_USD"];
+      var linhasCsv = [cabecalho.join(",")];
+
+      resultado.fila.forEach(function (c) {
+        var linha = [
+          c.posicao,
+          '"' + String(c.account_id || "").replace(/"/g, '""') + '"',
+          '"' + String(c.segment || "-").replace(/"/g, '""') + '"',
+          '"' + String(c.country || "-").replace(/"/g, '""') + '"',
+          +(c.escore || 0).toFixed(4),
+          Math.round(c.valor_em_risco || 0),
+          Math.round(c.valor_esperado || 0)
+        ];
+        linhasCsv.push(linha.join(","));
+      });
+
+      var blob = new Blob(["\uFEFF" + linhasCsv.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+      var link = document.createElement("a");
+      var url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "fila_retencao_kovan.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    if ($("btn-exportar-csv")) {
+      $("btn-exportar-csv").addEventListener("click", exportarFilaCSV);
     }
 
     // Comunicação n8n

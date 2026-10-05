@@ -3,22 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de retenção Kovan &middot; MBA Inteli x Lenovo</title>
+  <title>Painel Executivo de Retenção Kovan LATAM &middot; MBA Inteli x Lenovo</title>
   <!--
-    Painel da Aula 08. Uma página, sem build: lê a planilha original do case,
-    treina o modelo no navegador (modelo.js), guarda os planos de ação de cada
-    área e conversa com uma equipe de três agentes no n8n.
-
-    Para criar a versão do grupo: a pasta frontend/ do repositório de prática
-    tem a mesma página pronta para abrir no Antigravity e modificar.
-
-    A planilha fica no navegador. Ao endpoint configurado vão só a fila do
-    ciclo, o resumo do modelo, os planos e o nome do modelo de linguagem.
+    Painel de Retenção Kovan LATAM (Módulo 2 - Inteli x Lenovo).
+    Processa a planilha no navegador (modelo.js), exibe os planos EWS,
+    visualizações executivas com Chart.js e conversa com a equipe de agentes no n8n.
   -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Platypi:wght@500;600&family=Space+Mono&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
   <link rel="stylesheet" href="inteli-brand.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--seg-superficie); color: var(--seg-texto); font-size: 16px; }
@@ -27,81 +22,289 @@
       background: var(--seg-primaria); color: var(--inteli-branco);
       padding: 18px 32px 0; border-bottom: 4px solid var(--seg-destaque);
     }
-    .topo-linha { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; max-width: 1320px; margin: 0 auto; }
+    .topo-linha { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; max-width: 1360px; margin: 0 auto; }
     header.topo h1 { margin: 0; font-size: 28px; color: var(--inteli-branco); }
-    header.topo p { margin: 0; font-size: 14px; }
-    /* Trilha dos quatro passos: cada um acende quando fica pronto. */
-    .trilha { max-width: 1320px; margin: 16px auto 0; overflow-x: auto; }
+    header.topo p { margin: 4px 0 0; font-size: 14px; opacity: 0.9; }
+    .trilha { max-width: 1360px; margin: 16px auto 0; overflow-x: auto; }
     .trilha ol { display: flex; margin: 0; padding: 0; }
-    .trilha li { list-style: none; flex: 1; min-width: 150px; padding: 10px 14px 12px; font-size: 14px;
-                 border-top: 3px solid transparent; display: flex; gap: 10px; align-items: center; }
+    .trilha li { list-style: none; flex: 1; min-width: 160px; padding: 10px 14px 12px; font-size: 14px;
+                 border-top: 3px solid transparent; display: flex; gap: 10px; align-items: center; color: var(--inteli-branco); }
     .trilha .n { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
                  border: 2px solid var(--inteli-branco); font-weight: 700; font-size: 13px; flex: none; transition: background .4s; }
     .trilha li.feito { border-top-color: var(--seg-secundaria); }
     .trilha li.feito .n { background: var(--seg-secundaria); border-color: var(--seg-secundaria); }
-    main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 64px;
-           display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 24px; }
-    @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+
+    main { max-width: 1360px; margin: 0 auto; padding: 24px 16px 64px;
+           display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr); gap: 24px; }
+    @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
     .coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-    section.bloco { background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 20px 22px; }
-    .bloco h2 { margin: 0 0 4px; font-size: 21px; display: flex; gap: 12px; align-items: baseline; }
-    .bloco h2 .num { color: var(--seg-destaque); font-size: 15px; }
-    .bloco .ajuda { margin: 0 0 14px; font-size: 14px; line-height: 1.5; }
-    label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 6px; }
+    section.bloco { background: var(--seg-base); border: 1px solid var(--seg-borda); padding: 20px 22px; border-radius: 8px; }
+    .bloco h2 { margin: 0 0 4px; font-size: 21px; display: flex; gap: 12px; align-items: baseline; color: var(--seg-primaria); }
+    .bloco h2 .num { color: var(--seg-destaque); font-size: 15px; font-weight: 700; }
+    .bloco .ajuda { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: var(--seg-texto); }
+    label { display: block; font-weight: 600; font-size: 13px; margin: 12px 0 6px; color: var(--seg-primaria); }
     input[type=url], input[type=text], textarea, select {
       width: 100%; font: inherit; color: var(--seg-texto); background: var(--seg-base);
-      border: 1px solid var(--seg-borda); padding: 10px 12px;
+      border: 1px solid var(--seg-borda); padding: 10px 12px; border-radius: 6px;
     }
     textarea { min-height: 110px; resize: vertical; font-size: 14px; line-height: 1.45; }
     input:focus, textarea:focus, select:focus { outline: 2px solid var(--seg-secundaria); outline-offset: -1px; }
     button, a.botao {
-      font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px;
+      font: inherit; font-weight: 600; cursor: pointer; border: 0; padding: 10px 18px; border-radius: 6px;
       background: var(--seg-primaria); color: var(--inteli-branco); text-decoration: none;
-      display: inline-flex; gap: 8px; align-items: center;
+      display: inline-flex; gap: 8px; align-items: center; transition: background .2s;
     }
-    button.secundario, a.botao { background: var(--seg-base); color: var(--seg-primaria); border: 1px solid var(--seg-primaria); }
+    button:hover, a.botao:hover { background: #3d3254; }
+    button.secundario, a.botao.secundario { background: var(--seg-base); color: var(--seg-primaria); border: 1px solid var(--seg-primaria); }
     button:disabled { cursor: not-allowed; background: var(--seg-borda); color: var(--seg-texto); }
     .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
-    .status { font-size: 14px; }
-    .status.ok { color: var(--seg-secundaria); font-weight: 600; }
-    .status.erro { color: var(--seg-destaque); font-weight: 600; }
+    .status { font-size: 13px; }
+    .status.ok { color: var(--seg-secundaria); font-weight: 700; }
+    .status.erro { color: var(--seg-destaque); font-weight: 700; }
     .material-symbols-outlined { font-size: 20px; }
 
     /* 01: planilha */
-    .soltar { border: 2px dashed var(--seg-borda); padding: 22px; text-align: center; cursor: pointer; background: var(--seg-superficie); transition: border-color .2s, background .2s; }
+    .soltar { border: 2px dashed var(--seg-borda); padding: 22px; text-align: center; cursor: pointer; background: var(--seg-superficie); border-radius: 8px; transition: border-color .2s, background .2s; }
     .soltar:hover, .soltar.ativo { border-color: var(--seg-secundaria); background: var(--seg-base); }
-    .soltar strong { display: flex; justify-content: center; gap: 8px; align-items: center; font-size: 17px; margin-bottom: 4px; }
-    .etapas { list-style: none; padding: 0; margin: 14px 0 0; font-size: 14px; display: none; }
+    .soltar strong { display: flex; justify-content: center; gap: 8px; align-items: center; font-size: 16px; margin-bottom: 4px; color: var(--seg-primaria); }
+    .etapas { list-style: none; padding: 0; margin: 14px 0 0; font-size: 13px; display: none; }
     .etapas.visivel { display: block; }
-    .etapas li { display: flex; gap: 8px; align-items: center; padding: 3px 0; opacity: .45; transition: opacity .3s; }
+    .etapas li { display: flex; gap: 8px; align-items: center; padding: 4px 0; opacity: .45; transition: opacity .3s; }
     .etapas li.ativa, .etapas li.feita { opacity: 1; }
     .etapas li.ativa .material-symbols-outlined { animation: girar 1s linear infinite; }
     .etapas li.feita .material-symbols-outlined { color: var(--seg-secundaria); }
-    input[type=number] { width: 100px; font: inherit; padding: 8px 10px; border: 1px solid var(--seg-borda); }
+    input[type=number] { width: 100px; font: inherit; padding: 8px 10px; border: 1px solid var(--seg-borda); border-radius: 6px; }
     .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
     @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    .kpi { border-left: 4px solid var(--seg-secundaria); background: var(--seg-superficie); padding: 10px 12px; animation: subir .5s both; }
+    .kpi { border-left: 4px solid var(--seg-secundaria); background: var(--seg-superficie); padding: 10px 12px; border-radius: 0 6px 6px 0; animation: subir .5s both; }
     .kpi:nth-child(2) { animation-delay: .08s; } .kpi:nth-child(3) { animation-delay: .16s; } .kpi:nth-child(4) { animation-delay: .24s; }
-    .kpi .v { font-size: 24px; font-weight: 500; margin: 0; white-space: nowrap; }
-    .kpi .r { font-size: 13px; margin: 2px 0 0; }
-    details summary { cursor: pointer; font-weight: 600; font-size: 14px; margin-top: 14px; }
-    .pesos { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 10px; align-items: center; font-size: 13px; margin-top: 10px; }
-    .pesos .barra { height: 10px; background: var(--seg-superficie); position: relative; }
+    .kpi .v { font-size: 22px; font-weight: 700; margin: 0; white-space: nowrap; color: var(--seg-primaria); }
+    .kpi .r { font-size: 12px; margin: 2px 0 0; color: var(--seg-texto); }
+    details summary { cursor: pointer; font-weight: 600; font-size: 13px; margin-top: 14px; color: var(--seg-primaria); }
+    .pesos { display: grid; grid-template-columns: max-content 1fr max-content; gap: 6px 10px; align-items: center; font-size: 12px; margin-top: 10px; }
+    .pesos .barra { height: 10px; background: var(--seg-superficie); position: relative; border-radius: 2px; }
     .pesos .barra span { position: absolute; top: 0; height: 10px; transition: width .8s ease-out; }
     .pesos .barra span.mais { left: 50%; background: var(--seg-destaque); }
     .pesos .barra span.menos { right: 50%; background: var(--seg-secundaria); }
     .pesos .barra::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--seg-texto); }
-    .tabela-rolagem { overflow-x: auto; margin-top: 14px; max-height: 320px; overflow-y: auto; }
+    .tabela-rolagem { overflow-x: auto; margin-top: 14px; max-height: 320px; overflow-y: auto; border: 1px solid var(--seg-borda); border-radius: 6px; }
     table { border-collapse: collapse; width: 100%; font-size: 13px; }
-    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--seg-borda); white-space: nowrap; }
-    th { position: sticky; top: 0; background: var(--seg-primaria); color: var(--inteli-branco); font-weight: 600; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--seg-borda); white-space: nowrap; }
+    th { position: sticky; top: 0; background: var(--seg-primaria); color: var(--inteli-branco); font-weight: 600; z-index: 2; }
     td.n { text-align: right; font-variant-numeric: tabular-nums; }
-    tbody tr { cursor: pointer; }
+    tbody tr { cursor: pointer; transition: background .15s; }
     tbody tr:hover td { background: var(--seg-superficie); }
     tr.perdida td:first-child { border-left: 4px solid var(--seg-destaque); }
-    .legenda { font-size: 12px; margin: 6px 0 0; }
+    .legenda { font-size: 12px; margin: 6px 0 0; color: var(--seg-texto); }
 
-    /* 02: planos */
+    /* Filtros e Gráficos Executivos */
+    .filtros-executivos {
+      background: var(--seg-superficie);
+      border: 1px solid var(--seg-borda);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+    .filtros-cabecalho {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .filtros-titulo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--seg-primaria);
+    }
+    .btn-limpar {
+      background: transparent;
+      border: 0;
+      color: var(--seg-destaque);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+    }
+    .btn-limpar:hover { text-decoration: underline; }
+    .filtros-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 768px) {
+      .filtros-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .campo-filtro label { margin: 0 0 4px; font-size: 12px; font-weight: 600; }
+    .campo-filtro select, .campo-filtro input {
+      font-size: 12px;
+      padding: 6px 8px;
+      background: var(--seg-base);
+    }
+    .kpis-filtrados {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--seg-borda);
+    }
+    @media (max-width: 600px) {
+      .kpis-filtrados { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .kpi-mini {
+      background: var(--seg-base);
+      border-radius: 6px;
+      padding: 8px 10px;
+      border-left: 3px solid var(--seg-secundaria);
+    }
+    .kpi-mini.destaque { border-left-color: var(--seg-destaque); }
+    .kpi-mini .num { font-size: 15px; font-weight: 700; color: var(--seg-primaria); display: block; }
+    .kpi-mini .sub { font-size: 11px; color: var(--seg-texto); display: block; margin-top: 1px; }
+
+    /* Grade de gráficos executivos */
+    .graficos-executivos {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .grafico-card {
+      background: var(--seg-base);
+      border: 1px solid var(--seg-borda);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .grafico-topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .grafico-topo h4 { margin: 0; font-size: 14px; color: var(--seg-primaria); font-weight: 700; }
+    .grafico-sub { margin: 2px 0 0; font-size: 12px; color: var(--seg-texto); }
+    .legenda-quadrantes {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 11px;
+    }
+    .pill-legenda {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .pill-legenda.q-urgente { background: rgba(255, 69, 69, 0.12); color: var(--inteli-coral); }
+    .pill-legenda.q-blindagem { background: rgba(2, 132, 199, 0.12); color: #0284c7; }
+    .pill-legenda.q-techtouch { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+    .graficos-dupla {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 720px) {
+      .graficos-dupla { grid-template-columns: 1fr; }
+    }
+    .canvas-container {
+      position: relative;
+      width: 100%;
+    }
+    .tag-regua {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .tag-regua.r1 { background: rgba(255, 69, 69, 0.12); color: var(--inteli-coral); }
+    .tag-regua.r2 { background: rgba(245, 158, 11, 0.15); color: #b45309; }
+    .tag-regua.r3 { background: rgba(2, 132, 199, 0.12); color: #0284c7; }
+    .info-tabela-filtro {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--seg-texto);
+    }
+
+    /* 02: EWS e Planos de ação */
+    .ews-header { margin-bottom: 12px; }
+    .ews-badge-pilula {
+      display: inline-block;
+      padding: 3px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #0284c7;
+      border: 1.5px solid #38bdf8;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.08);
+      margin-bottom: 6px;
+    }
+    .ews-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 900px) { .ews-cards { grid-template-columns: 1fr; } }
+    .ews-card {
+      background: var(--seg-base);
+      border: 1px solid var(--seg-borda);
+      border-radius: 20px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .ews-card-titulo {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+    .ews-card-titulo.coral { color: var(--inteli-coral); }
+    .ews-card-titulo.cyan { color: #0284c7; }
+    .ews-card-subtitulo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--seg-texto);
+      margin-bottom: 12px;
+    }
+    .ews-card ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--seg-texto);
+      flex: 1;
+    }
+    .ews-card li { margin-bottom: 8px; }
+    .ews-card li:last-child { margin-bottom: 0; }
+    .ews-card strong { font-weight: 700; color: var(--seg-primaria); }
+
+    .ews-editor-detalhes {
+      margin-top: 14px;
+      background: var(--seg-superficie);
+      border: 1px solid var(--seg-borda);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .ews-editor-detalhes summary { font-size: 13px; font-weight: 600; cursor: pointer; color: var(--seg-primaria); }
     .abas { display: flex; border-bottom: 2px solid var(--seg-primaria); margin-top: 6px; }
     .abas button { background: var(--seg-base); color: var(--seg-primaria); padding: 8px 16px; }
     .abas button[aria-selected=true] { background: var(--seg-primaria); color: var(--inteli-branco); }
@@ -163,8 +366,10 @@
 <body>
   <header class="topo">
     <div class="topo-linha">
-      <h1>Painel de retenção Kovan LATAM</h1>
-      <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Aula 08</p>
+      <div>
+        <h1>Painel Executivo de Retenção Kovan LATAM</h1>
+        <p>MBA em IA e Dados para Negócios &middot; Inteli x Lenovo &middot; Sistema de Apoio à Decisão</p>
+      </div>
     </div>
     <nav class="trilha" aria-label="Passos do painel"><ol>
       <li id="t1"><span class="n">1</span>Planilha e modelo</li>
@@ -194,6 +399,7 @@
           <label for="capacidade" style="margin:0">Capacidade do ciclo, em contas</label>
           <input id="capacidade" type="number" min="10" max="500" value="138">
         </div>
+
         <div id="resumo" hidden>
           <div class="kpis">
             <div class="kpi"><h4 class="v" id="k-contas">-</h4><p class="r">contas elegíveis</p></div>
@@ -201,29 +407,197 @@
             <div class="kpi"><h4 class="v" id="k-acertos">-</h4><p class="r">perdidas na fila</p></div>
             <div class="kpi"><h4 class="v" id="k-esperado">-</h4><p class="r">valor esperado da fila, USD</p></div>
           </div>
+
+          <!-- Gráfico SVG Top 10 por Valor Esperado -->
+          <div class="top10-grafico-card" style="margin-top:16px; background:var(--seg-base); border:1px solid var(--seg-borda); border-radius:8px; padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+              <div>
+                <h4 style="margin:0; font-size:14px; font-weight:700; color:var(--seg-primaria);">Top 10 contas por maior valor esperado da fila</h4>
+                <p style="margin:2px 0 0; font-size:12px; color:var(--seg-texto-suave);">Valor esperado em risco (USD) na fila de retenção</p>
+              </div>
+            </div>
+            <div style="width:100%; overflow-x:auto;">
+              <svg id="top10-svg" viewBox="0 0 620 270" style="width:100%; max-width:620px; height:auto; display:block;" aria-label="Gráfico de barras horizontais em SVG com as dez contas de maior valor esperado da fila"></svg>
+            </div>
+          </div>
+
           <details>
             <summary>Peso de cada coluna no modelo</summary>
             <p class="ajuda" style="margin-top:8px">Coeficiente da regressão logística sobre a coluna padronizada. Para a direita, aumenta a chance de perda.</p>
             <div class="pesos" id="pesos"></div>
           </details>
+
+          <!-- Filtros Executivos de Decisão -->
+          <div class="filtros-executivos">
+            <div class="filtros-cabecalho">
+              <div class="filtros-titulo">
+                <span class="material-symbols-outlined" style="font-size:18px">filter_alt</span>
+                <span>Filtros Executivos de Decisão</span>
+              </div>
+              <button type="button" id="btn-limpar-filtros" class="btn-limpar">
+                <span class="material-symbols-outlined" style="font-size:14px">restart_alt</span> Limpar filtros
+              </button>
+            </div>
+            <div class="filtros-grid">
+              <div class="campo-filtro">
+                <label for="filtro-segmento">Segmento</label>
+                <select id="filtro-segmento">
+                  <option value="">Todos os segmentos</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label for="filtro-regua">Régua EWS</label>
+                <select id="filtro-regua">
+                  <option value="">Todas as réguas</option>
+                  <option value="regua1">Régua 1: Onboarding D+30</option>
+                  <option value="regua2">Régua 2: Gatilho Dinâmico P90</option>
+                  <option value="regua3">Régua 3: Pipeline Gap CRM</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label for="filtro-risco">Faixa de Risco</label>
+                <select id="filtro-risco">
+                  <option value="">Todos os níveis</option>
+                  <option value="critico">Crítico (Escore &ge; 70%)</option>
+                  <option value="alto">Alto (40% a 70%)</option>
+                  <option value="moderado">Moderado (&lt; 40%)</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label for="filtro-busca">Buscar Conta / ID</label>
+                <input id="filtro-busca" type="text" placeholder="ID ou país...">
+              </div>
+            </div>
+
+            <div class="kpis-filtrados">
+              <div class="kpi-mini">
+                <span class="num" id="kpi-f-contas">-</span>
+                <span class="sub">Contas filtradas</span>
+              </div>
+              <div class="kpi-mini">
+                <span class="num" id="kpi-f-receita">-</span>
+                <span class="sub">Receita 12M em risco</span>
+              </div>
+              <div class="kpi-mini destaque">
+                <span class="num" id="kpi-f-esperado">-</span>
+                <span class="sub">Perda esperada EWS</span>
+              </div>
+              <div class="kpi-mini">
+                <span class="num" id="kpi-f-escore">-</span>
+                <span class="sub">Escore médio de risco</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual Visualização de Gráficos Executivos -->
+          <div class="graficos-executivos">
+            <div class="grafico-card">
+              <div class="grafico-topo">
+                <div>
+                  <h4>Matriz Executiva: Escore de Perda vs. Receita 12M em Risco</h4>
+                  <p class="grafico-sub">Priorização em quadrantes estratégicos. Diâmetro da bolha = Valor Esperado em Risco (USD).</p>
+                </div>
+                <div class="legenda-quadrantes">
+                  <span class="pill-legenda q-urgente">Alta Urgência</span>
+                  <span class="pill-legenda q-blindagem">Blindagem Contratual</span>
+                  <span class="pill-legenda q-techtouch">Tech-Touch CS</span>
+                </div>
+              </div>
+              <div class="canvas-container" style="height: 260px;">
+                <canvas id="chart-matriz"></canvas>
+              </div>
+            </div>
+
+            <div class="graficos-dupla">
+              <div class="grafico-card">
+                <div class="grafico-topo">
+                  <div>
+                    <h4>Perda Esperada por Segmento</h4>
+                    <p class="grafico-sub">Concentração financeira por perfil de conta</p>
+                  </div>
+                </div>
+                <div class="canvas-container" style="height: 190px;">
+                  <canvas id="chart-segmentos"></canvas>
+                </div>
+              </div>
+
+              <div class="grafico-card">
+                <div class="grafico-topo">
+                  <div>
+                    <h4>Distribuição da Fila por Régua EWS</h4>
+                    <p class="grafico-sub">Alocação operacional das contas</p>
+                  </div>
+                </div>
+                <div class="canvas-container" style="height: 190px;">
+                  <canvas id="chart-reguas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-tabela-filtro">
+            <span id="info-tabela-contas">Fila do ciclo de retenção ordenada por Valor Esperado</span>
+            <span>Clique na linha para consultar os agentes</span>
+          </div>
           <div class="tabela-rolagem"><table id="tabela"></table></div>
           <p class="legenda">Clique numa conta para perguntar à equipe sobre ela. Barra vermelha à esquerda: conta marcada como perdida no case.</p>
         </div>
       </section>
 
       <section class="bloco" id="bloco-planos">
-        <h2><span class="num">02</span>Planos de ação por área</h2>
-        <p class="ajuda">A Vera, estrategista da equipe, só recomenda o que estiver escrito aqui. Os textos são exemplos: substitua pelo plano do grupo, com o limiar numérico de cada item.</p>
-        <div class="abas" role="tablist">
-          <button type="button" role="tab" aria-selected="true" data-aba="comercial">Comercial</button>
-          <button type="button" role="tab" aria-selected="false" data-aba="atendimento">Atendimento</button>
-          <button type="button" role="tab" aria-selected="false" data-aba="posvendas">Pós-vendas</button>
+        <div class="ews-header">
+          <span class="ews-badge-pilula">PLANO DE AÇÃO</span>
+          <h2 style="margin-top:4px"><span class="num">02</span>Sistema de Alerta Precoce (EWS): 3 Réguas de Ação Imediata</h2>
+          <p class="ajuda">A Vera (Estrategista) e o Ciro (Revisor) utilizam as 3 réguas do EWS abaixo para recomendar intervenções de retenção. Edite os textos no painel retrátil se desejar alterar o plano transmitido aos agentes.</p>
         </div>
-        <div class="aba ativa" data-aba="comercial"><textarea id="plano-comercial" aria-label="Plano da área comercial"></textarea></div>
-        <div class="aba" data-aba="atendimento"><textarea id="plano-atendimento" aria-label="Plano da área de atendimento"></textarea></div>
-        <div class="aba" data-aba="posvendas"><textarea id="plano-posvendas" aria-label="Plano da área de pós-vendas"></textarea></div>
-        <div class="linha"><button id="restaurar" class="secundario" type="button">Restaurar exemplos</button>
-          <span class="status">Os planos ficam salvos neste navegador.</span></div>
+
+        <div class="ews-cards">
+          <div class="ews-card">
+            <div class="ews-card-titulo coral">RÉGUA 1: ONBOARDING D+30</div>
+            <div class="ews-card-subtitulo">Foco: Novos Compradores</div>
+            <ul>
+              <li>Jornada <strong>automática</strong> de CS após a <strong>primeira entrega</strong>.</li>
+              <li><strong>Contato</strong> de <strong>validação técnica</strong> em D+15 e <strong>oferta</strong> do <strong>2º pedido</strong> em D+30.</li>
+              <li>Meta: <strong>Converter</strong> a <strong>2ª compra</strong> e <strong>derrubar</strong> o churn de 85% para &lt; 30%.</li>
+            </ul>
+          </div>
+
+          <div class="ews-card">
+            <div class="ews-card-titulo coral">RÉGUA 2: GATILHO DINÂMICO P90</div>
+            <div class="ews-card-subtitulo">Foco: Base Ativa Recorrente</div>
+            <ul>
+              <li>Alertas no ERP <strong>baseados</strong> no <strong>ritmo biológico</strong> de <strong>cada segmento</strong>.</li>
+              <li>Enterprise: <strong>Alerta vermelho</strong> com <strong>90 dias</strong> de silêncio (2x P90).</li>
+              <li><strong>Setor Público:</strong> Janela <strong>ajustada</strong> para 24 a 36 meses (<strong>editais</strong>).</li>
+            </ul>
+          </div>
+
+          <div class="ews-card">
+            <div class="ews-card-titulo cyan">RÉGUA 3: PIPELINE GAP NO CRM</div>
+            <div class="ews-card-subtitulo">Foco: Strategic Accounts</div>
+            <ul>
+              <li><strong>Monitoramento em tempo real</strong> de <strong>oportunidades ganhas</strong>.</li>
+              <li><strong>Disparo imediato</strong> para <strong>Diretoria</strong> com <strong>90 dias sem propostas</strong>.</li>
+              <li><strong>Reunião</strong> Trimestral (QBR) <strong>obrigatória</strong> com o <strong>CIO do cliente</strong>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <details class="ews-editor-detalhes">
+          <summary>Editar texto das Réguas EWS enviadas aos agentes</summary>
+          <div class="abas" role="tablist" style="margin-top:10px">
+            <button type="button" role="tab" aria-selected="true" data-aba="atendimento">Régua 1: Onboarding D+30</button>
+            <button type="button" role="tab" aria-selected="false" data-aba="posvendas">Régua 2: Gatilho Dinâmico P90</button>
+            <button type="button" role="tab" aria-selected="false" data-aba="comercial">Régua 3: Pipeline Gap CRM</button>
+          </div>
+          <div class="aba ativa" data-aba="atendimento"><textarea id="plano-atendimento" aria-label="Plano da área de atendimento"></textarea></div>
+          <div class="aba" data-aba="posvendas"><textarea id="plano-posvendas" aria-label="Plano da área de pós-vendas"></textarea></div>
+          <div class="aba" data-aba="comercial"><textarea id="plano-comercial" aria-label="Plano da área comercial"></textarea></div>
+          <div class="linha">
+            <button id="restaurar" class="secundario" type="button">Restaurar réguas EWS padrão</button>
+            <span class="status">Os planos ficam salvos neste navegador.</span>
+          </div>
+        </details>
       </section>
 
       <section class="bloco" id="bloco-conexao">
@@ -282,6 +656,7 @@
       </section>
     </div>
   </main>
+
   <footer>Inteli &middot; Instituto de Tecnologia e Liderança &middot; Módulo 2, Trilha de Tecnologia</footer>
 
   <script src="modelo.js"></script>
@@ -289,9 +664,9 @@
   (function () {
     "use strict";
     var PLANOS_EXEMPLO = {
-      comercial: "Exemplo, substitua pelo plano do grupo.\n1. Conta com valor esperado acima de USD 500 mil: ligação do Account Manager em até 5 dias úteis, com revisão do mix comprado nos últimos 12 meses.\n2. Conta com receita dos 12 meses abaixo de metade do pico anual: proposta de renovação do parque instalado, sem desconto fora da tabela vigente.\n3. Nenhuma condição comercial é oferecida sem aprovação do gerente regional.",
-      atendimento: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 4 meses ou mais desde a última compra: contato do time de atendimento para verificar chamados abertos e satisfação.\n2. Registrar no CRM o motivo informado pelo cliente.\n3. Escalar ao Comercial quando o cliente citar concorrente.",
-      posvendas: "Exemplo, substitua pelo plano do grupo.\n1. Conta com 3 meses ou menos de compra nos últimos 12: revisão técnica do parque e da garantia.\n2. Conta com contrato de serviço a vencer em 90 dias: oferta de extensão de garantia pela tabela vigente.\n3. Registrar no CRM toda visita técnica feita a conta da fila."
+      atendimento: "RÉGUA 1: ONBOARDING D+30 (Foco: Novos Compradores)\n- Jornada automática de CS após a primeira entrega.\n- Contato de validação técnica em D+15 e oferta do 2º pedido em D+30.\n- Meta: Converter a 2ª compra e derrubar o churn de 85% para < 30%.",
+      posvendas: "RÉGUA 2: GATILHO DINÂMICO P90 (Foco: Base Ativa Recorrente)\n- Alertas no ERP baseados no ritmo biológico de cada segmento.\n- Enterprise: Alerta vermelho com 90 dias de silêncio (2x P90).\n- Setor Público: Janela ajustada para 24 a 36 meses (editais).",
+      comercial: "RÉGUA 3: PIPELINE GAP NO CRM (Foco: Strategic Accounts)\n- Monitoramento em tempo real de oportunidades ganhas.\n- Disparo imediato para Diretoria com 90 dias sem propostas.\n- Reunião Trimestral (QBR) obrigatória com o CIO do cliente."
     };
     var AGENTES = ["atlas", "vera", "ciro"];
     var AREAS = ["comercial", "atendimento", "posvendas"];
@@ -324,6 +699,7 @@
       li.className = estado;
       li.querySelector(".material-symbols-outlined").textContent = estado === "feita" ? "check_circle" : "progress_activity";
     }
+    
     function carregar(arquivo) {
       $("nome-arquivo").className = "status";
       $("nome-arquivo").textContent = arquivo.name;
@@ -369,7 +745,7 @@
       if (!linhas.length) return;
       var cap = Math.max(10, Math.min(500, parseInt($("capacidade").value, 10) || 138));
       resultado = KovanModelo.rodar(linhas, cap);
-      window.KOVAN = resultado;   // para o teste e para quem quiser inspecionar no console
+      window.KOVAN = resultado;
       KovanModelo.guardar(KovanModelo.contexto(resultado));
       var r = resultado;
       $("resumo").hidden = false;
@@ -387,29 +763,349 @@
       setTimeout(function () {
         document.querySelectorAll("#pesos .barra span").forEach(function (s) { s.style.width = s.dataset.l; });
       }, 50);
-      var cols = [["posicao", "Pos."], ["account_id", "Conta"], ["segment", "Segmento"], ["escore", "Escore"],
-                  ["valor_em_risco", "Receita 12m"], ["valor_esperado", "Valor esperado"],
-                  ["meses_desde_ultima_compra", "Meses sem compra"], ["meses_com_compra_12m", "Meses com compra"]];
-      var html = "<thead><tr>" + cols.map(function (c) { return "<th>" + c[1] + "</th>"; }).join("") + "</tr></thead><tbody>";
-      r.fila.forEach(function (l) {
-        html += "<tr data-conta=\"" + esc(l.account_id) + "\"" + (l.churn ? " class=\"perdida\"" : "") + ">" + cols.map(function (c) {
-          var v = l[c[0]];
-          if (c[0] === "escore") return "<td class=\"n\">" + dec(v, 3) + "</td>";
-          if (typeof v === "number") return "<td class=\"n\">" + fmt.format(v) + "</td>";
-          return "<td>" + esc(v) + "</td>";
-        }).join("") + "</tr>";
-      });
-      $("tabela").innerHTML = html + "</tbody>";
-      aviso_chat("Modelo treinado: " + fmt.format(r.contas) + " contas, AUC " + dec(r.auc, 3) + ". Fila de " + r.fila.length + " contas pronta para a equipe.");
+      inicializarFiltrosECharts();
       trilha();
     }
     $("capacidade").addEventListener("change", calcular);
+
+    function classificarRegua(c) {
+      if ((c.meses_com_compra_12m <= 1 && c.meses_de_casa <= 12) || c.meses_de_casa <= 6) {
+        return { id: "regua1", sigla: "R1: Onboarding", nome: "Régua 1: Onboarding D+30", cor: "#ff4545" };
+      }
+      var ehEnterprise = (c.segment && c.segment.toLowerCase().indexOf("enterprise") >= 0);
+      if (c.valor_em_risco >= 250000 || (ehEnterprise && c.valor_em_risco >= 100000)) {
+        return { id: "regua3", sigla: "R3: Pipeline CRM", nome: "Régua 3: Pipeline Gap CRM", cor: "#0284c7" };
+      }
+      return { id: "regua2", sigla: "R2: Gatilho P90", nome: "Régua 2: Gatilho Dinâmico P90", cor: "#f59e0b" };
+    }
+
+    function renderizarTop10SVG(fila) {
+      var svg = $("top10-svg");
+      if (!svg || !fila || !fila.length) return;
+      var top10 = fila.slice().sort(function (a, b) {
+        return (b.valor_esperado || 0) - (a.valor_esperado || 0);
+      }).slice(0, 10);
+
+      var maxVal = Math.max.apply(null, top10.map(function (c) { return c.valor_esperado || 0; })) || 1;
+      var larguraBarraMax = 320;
+      var inicioX = 110;
+      var yOffset = 18;
+      var linhaAltura = 25;
+      var barraH = 15;
+
+      var conteudo = '<g class="top10-barras">';
+      top10.forEach(function (c, i) {
+        var y = yOffset + i * linhaAltura;
+        var valor = c.valor_esperado || 0;
+        var w = Math.max(4, Math.round((valor / maxVal) * larguraBarraMax));
+        var labelConta = c.account_id || ("#" + (i + 1));
+        var valorFmt = "USD " + fmt.format(valor);
+        var corBarra = c.churn === 1 ? "var(--seg-destaque)" : "var(--seg-secundaria)";
+
+        conteudo += '<rect x="' + inicioX + '" y="' + y + '" width="' + larguraBarraMax + '" height="' + barraH + '" rx="3" fill="var(--seg-superficie)"></rect>';
+        conteudo += '<rect x="' + inicioX + '" y="' + y + '" width="' + w + '" height="' + barraH + '" rx="3" fill="' + corBarra + '"><title>' + esc(labelConta) + ': ' + esc(valorFmt) + '</title></rect>';
+        conteudo += '<text x="' + (inicioX - 8) + '" y="' + (y + 11) + '" text-anchor="end" fill="var(--seg-texto)" font-family="var(--fonte-mono)" font-size="11" font-weight="600">' + esc(labelConta) + '</text>';
+        conteudo += '<text x="' + (inicioX + w + 8) + '" y="' + (y + 11) + '" text-anchor="start" fill="var(--seg-primaria)" font-family="var(--fonte-mono)" font-size="11" font-weight="700">' + esc(valorFmt) + '</text>';
+      });
+      conteudo += '</g>';
+      svg.innerHTML = conteudo;
+    }
+
+    var chartMatriz = null;
+    var chartSegmentos = null;
+    var chartReguas = null;
+
+    function inicializarFiltrosECharts() {
+      if (!resultado || !resultado.fila) return;
+      renderizarTop10SVG(resultado.fila);
+      var segmentos = {};
+      resultado.fila.forEach(function (c) {
+        if (c.segment) segmentos[c.segment] = true;
+        c.regua = classificarRegua(c);
+      });
+      var selSeg = $("filtro-segmento");
+      var segAtual = selSeg.value;
+      selSeg.innerHTML = '<option value="">Todos os segmentos</option>' +
+        Object.keys(segmentos).sort().map(function (s) {
+          return '<option value="' + esc(s) + '"' + (s === segAtual ? " selected" : "") + '>' + esc(s) + '</option>';
+        }).join("");
+
+      aplicarFiltrosEAtualizar();
+    }
+
+    function aplicarFiltrosEAtualizar() {
+      if (!resultado || !resultado.fila) return;
+
+      var seg = $("filtro-segmento").value;
+      var reg = $("filtro-regua").value;
+      var ris = $("filtro-risco").value;
+      var busca = $("filtro-busca").value.trim().toLowerCase();
+
+      var filtradas = resultado.fila.filter(function (c) {
+        if (seg && c.segment !== seg) return false;
+        if (reg && c.regua.id !== reg) return false;
+        if (ris === "critico" && !(c.escore >= 0.7)) return false;
+        if (ris === "alto" && !(c.escore >= 0.4 && c.escore < 0.7)) return false;
+        if (ris === "moderado" && !(c.escore < 0.4)) return false;
+        if (busca) {
+          var idMatch = c.account_id && c.account_id.toLowerCase().indexOf(busca) >= 0;
+          var paisMatch = c.country && c.country.toLowerCase().indexOf(busca) >= 0;
+          var segMatch = c.segment && c.segment.toLowerCase().indexOf(busca) >= 0;
+          if (!idMatch && !paisMatch && !segMatch) return false;
+        }
+        return true;
+      });
+
+      var totalReceita = filtradas.reduce(function (acc, c) { return acc + (c.valor_em_risco || 0); }, 0);
+      var totalEsperado = filtradas.reduce(function (acc, c) { return acc + (c.valor_esperado || 0); }, 0);
+      var mediaEscore = filtradas.length ? (filtradas.reduce(function (acc, c) { return acc + c.escore; }, 0) / filtradas.length) : 0;
+
+      $("kpi-f-contas").textContent = filtradas.length + " de " + resultado.fila.length;
+      $("kpi-f-receita").textContent = compacto(totalReceita);
+      $("kpi-f-esperado").textContent = compacto(totalEsperado);
+      $("kpi-f-escore").textContent = (mediaEscore * 100).toFixed(1) + "%";
+
+      atualizarGraficos(filtradas);
+      renderizarTabela(filtradas);
+    }
+
+    function renderizarTabela(dados) {
+      var cols = [
+        ["posicao", "Pos."],
+        ["account_id", "Conta"],
+        ["segment", "Segmento"],
+        ["regua", "Régua EWS"],
+        ["escore", "Escore de Risco"],
+        ["valor_em_risco", "Receita 12M"],
+        ["valor_esperado", "Valor Esperado"],
+        ["meses_desde_ultima_compra", "Meses s/ compra"]
+      ];
+      var html = "<thead><tr>" + cols.map(function (c) { return "<th>" + c[1] + "</th>"; }).join("") + "</tr></thead><tbody>";
+      dados.forEach(function (l) {
+        var reguaTag = '<span class="tag-regua ' + (l.regua.id === "regua1" ? "r1" : l.regua.id === "regua2" ? "r2" : "r3") + '">' + esc(l.regua.sigla) + '</span>';
+        html += "<tr data-conta=\"" + esc(l.account_id) + "\"" + (l.churn ? " class=\"perdida\"" : "") + ">" +
+          "<td class=\"n\">" + l.posicao + "</td>" +
+          "<td><strong>" + esc(l.account_id) + "</strong></td>" +
+          "<td>" + esc(l.segment || "-") + "</td>" +
+          "<td>" + reguaTag + "</td>" +
+          "<td class=\"n\">" + dec(l.escore, 3) + "</td>" +
+          "<td class=\"n\">USD " + fmt.format(l.valor_em_risco) + "</td>" +
+          "<td class=\"n\">USD " + fmt.format(l.valor_esperado) + "</td>" +
+          "<td class=\"n\">" + l.meses_desde_ultima_compra + "</td>" +
+          "</tr>";
+      });
+      $("tabela").innerHTML = html + "</tbody>";
+      $("info-tabela-contas").textContent = "Exibindo " + dados.length + " de " + (resultado ? resultado.fila.length : 0) + " contas na fila";
+    }
+
+    function atualizarGraficos(dados) {
+      if (typeof Chart === "undefined") return;
+
+      var dsR1 = [], dsR2 = [], dsR3 = [];
+      dados.forEach(function (c) {
+        var p = {
+          x: +(c.escore * 100).toFixed(1),
+          y: Math.round(c.valor_em_risco),
+          account_id: c.account_id,
+          segment: c.segment || "-",
+          valor_esperado: Math.round(c.valor_esperado),
+          regua_nome: c.regua.nome,
+          r: Math.max(4, Math.min(13, Math.sqrt((c.valor_esperado || 1000) / 1800)))
+        };
+        if (c.regua.id === "regua1") dsR1.push(p);
+        else if (c.regua.id === "regua3") dsR3.push(p);
+        else dsR2.push(p);
+      });
+
+      if (chartMatriz) {
+        chartMatriz.data.datasets[0].data = dsR1;
+        chartMatriz.data.datasets[1].data = dsR2;
+        chartMatriz.data.datasets[2].data = dsR3;
+        chartMatriz.update();
+      } else {
+        var ctxM = $("chart-matriz").getContext("2d");
+        chartMatriz = new Chart(ctxM, {
+          type: "bubble",
+          data: {
+            datasets: [
+              { label: "R1: Onboarding D+30", data: dsR1, backgroundColor: "rgba(255, 69, 69, 0.75)", borderColor: "#ff4545" },
+              { label: "R2: Gatilho P90", data: dsR2, backgroundColor: "rgba(245, 158, 11, 0.75)", borderColor: "#f59e0b" },
+              { label: "R3: Pipeline Gap CRM", data: dsR3, backgroundColor: "rgba(2, 132, 199, 0.75)", borderColor: "#0284c7" }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: function (evt, activeEls) {
+              if (!activeEls.length) return;
+              var el = activeEls[0];
+              var pt = chartMatriz.data.datasets[el.datasetIndex].data[el.index];
+              if (pt && pt.account_id) {
+                $("pergunta").value = "Analise a conta " + pt.account_id + " (" + pt.segment + ", Receita: USD " + fmt.format(pt.y) + ", Escore: " + pt.x + "%). Qual a recomendação da " + pt.regua_nome + "?";
+                $("pergunta").focus();
+                $("pergunta").scrollIntoView({ behavior: "smooth" });
+              }
+            },
+            plugins: {
+              legend: { position: "top", labels: { boxWidth: 10, font: { size: 11, family: "Manrope" } } },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    var p = ctx.raw;
+                    return [
+                      "Conta: " + p.account_id + " (" + p.segment + ")",
+                      "Escore de Perda: " + p.x + "% | Receita: USD " + fmt.format(p.y),
+                      "Perda Esperada: USD " + fmt.format(p.valor_esperado),
+                      p.regua_nome
+                    ];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: "Probabilidade de Perda (Escore %)", font: { size: 11 } },
+                min: 0, max: 100,
+                grid: { color: "rgba(0,0,0,0.06)" }
+              },
+              y: {
+                title: { display: true, text: "Receita 12M em Risco (USD)", font: { size: 11 } },
+                beginAtZero: true,
+                ticks: { callback: function (v) { return compacto(v); } },
+                grid: { color: "rgba(0,0,0,0.06)" }
+              }
+            }
+          }
+        });
+      }
+
+      var segPerdas = {};
+      dados.forEach(function (c) {
+        var s = c.segment || "Outros";
+        segPerdas[s] = (segPerdas[s] || 0) + c.valor_esperado;
+      });
+      var segLabels = Object.keys(segPerdas).sort(function (a, b) { return segPerdas[b] - segPerdas[a]; });
+      var segValores = segLabels.map(function (s) { return Math.round(segPerdas[s]); });
+
+      if (chartSegmentos) {
+        chartSegmentos.data.labels = segLabels;
+        chartSegmentos.data.datasets[0].data = segValores;
+        chartSegmentos.update();
+      } else {
+        var ctxS = $("chart-segmentos").getContext("2d");
+        chartSegmentos = new Chart(ctxS, {
+          type: "bar",
+          data: {
+            labels: segLabels,
+            datasets: [{
+              label: "Perda Esperada (USD)",
+              data: segValores,
+              backgroundColor: "rgba(6, 109, 115, 0.85)",
+              borderRadius: 4
+            }]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: function (evt, activeEls) {
+              if (!activeEls.length) return;
+              var idx = activeEls[0].index;
+              var segClicado = chartSegmentos.data.labels[idx];
+              $("filtro-segmento").value = segClicado;
+              aplicarFiltrosEAtualizar();
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) { return "Perda Esperada: USD " + fmt.format(ctx.raw); }
+                }
+              }
+            },
+            scales: {
+              x: { ticks: { callback: function (v) { return compacto(v); } }, grid: { display: false } },
+              y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+          }
+        });
+      }
+
+      var reguaContas = { regua1: 0, regua2: 0, regua3: 0 };
+      var reguaPerdas = { regua1: 0, regua2: 0, regua3: 0 };
+      dados.forEach(function (c) {
+        var id = c.regua.id;
+        if (reguaContas[id] !== undefined) {
+          reguaContas[id]++;
+          reguaPerdas[id] += c.valor_esperado;
+        }
+      });
+
+      if (chartReguas) {
+        chartReguas.data.datasets[0].data = [reguaContas.regua1, reguaContas.regua2, reguaContas.regua3];
+        chartReguas.update();
+      } else {
+        var ctxR = $("chart-reguas").getContext("2d");
+        chartReguas = new Chart(ctxR, {
+          type: "doughnut",
+          data: {
+            labels: ["R1: Onboarding", "R2: Gatilho P90", "R3: Pipeline CRM"],
+            datasets: [{
+              data: [reguaContas.regua1, reguaContas.regua2, reguaContas.regua3],
+              backgroundColor: ["#ff4545", "#f59e0b", "#0284c7"],
+              borderWidth: 2,
+              borderColor: "#ffffff"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            onClick: function (evt, activeEls) {
+              if (!activeEls.length) return;
+              var idx = activeEls[0].index;
+              var reguaId = ["regua1", "regua2", "regua3"][idx];
+              $("filtro-regua").value = reguaId;
+              aplicarFiltrosEAtualizar();
+            },
+            plugins: {
+              legend: { position: "right", labels: { boxWidth: 10, font: { size: 11 } } },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    var chave = ["regua1", "regua2", "regua3"][ctx.dataIndex];
+                    return ctx.label + ": " + ctx.raw + " contas (" + compacto(reguaPerdas[chave]) + " em risco)";
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    $("filtro-segmento").addEventListener("change", aplicarFiltrosEAtualizar);
+    $("filtro-regua").addEventListener("change", aplicarFiltrosEAtualizar);
+    $("filtro-risco").addEventListener("change", aplicarFiltrosEAtualizar);
+    $("filtro-busca").addEventListener("input", aplicarFiltrosEAtualizar);
+    $("btn-limpar-filtros").addEventListener("click", function () {
+      $("filtro-segmento").value = "";
+      $("filtro-regua").value = "";
+      $("filtro-risco").value = "";
+      $("filtro-busca").value = "";
+      aplicarFiltrosEAtualizar();
+    });
+
     $("tabela").addEventListener("click", function (e) {
       var tr = e.target.closest("tr[data-conta]");
       if (!tr) return;
-      $("pergunta").value = "Explique por que a conta " + tr.dataset.conta + " está na fila e qual área deve agir.";
+      var id = tr.dataset.conta;
+      var conta = resultado && resultado.fila ? resultado.fila.find(function (x) { return x.account_id === id; }) : null;
+      var reguaTexto = conta && conta.regua ? " (" + conta.regua.nome + ")" : "";
+      $("pergunta").value = "Analise a conta " + id + reguaTexto + ". Qual área deve atuar e com qual ação da régua?";
       $("pergunta").focus();
+      $("pergunta").scrollIntoView({ behavior: "smooth" });
     });
+
     var zona = $("soltar");
     zona.addEventListener("click", function () { $("arquivo").click(); });
     zona.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") $("arquivo").click(); });
@@ -428,8 +1124,7 @@
       t.addEventListener("input", function () { gravar("kovan-plano-" + a, t.value); trilha(); });
     });
     function planos() {
-      return { comercial: $("plano-comercial").value, atendimento: $("plano-atendimento").value,
-               "pós-vendas": $("plano-posvendas").value };
+      return { comercial: $("plano-comercial").value, atendimento: $("plano-atendimento").value, posvendas: $("plano-posvendas").value };
     }
     $("restaurar").addEventListener("click", function () {
       AREAS.forEach(function (a) { $("plano-" + a).value = PLANOS_EXEMPLO[a]; gravar("kovan-plano-" + a, PLANOS_EXEMPLO[a]); });
@@ -437,8 +1132,10 @@
     });
     document.querySelectorAll(".abas button").forEach(function (b) {
       b.addEventListener("click", function () {
-        document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", x === b); });
-        document.querySelectorAll(".aba").forEach(function (x) { x.classList.toggle("ativa", x.dataset.aba === b.dataset.aba); });
+        document.querySelectorAll(".abas button").forEach(function (x) { x.setAttribute("aria-selected", "false"); });
+        b.setAttribute("aria-selected", "true");
+        document.querySelectorAll(".aba").forEach(function (x) { x.classList.remove("ativa"); });
+        document.querySelector('.aba[data-aba="' + b.dataset.aba + '"]').classList.add("ativa");
       });
     });
 
@@ -458,46 +1155,52 @@
     $("endpoint").addEventListener("change", function () { gravar("kovan-endpoint", this.value.trim()); });
     function chamar(pergunta) {
       var url = $("endpoint").value.trim();
-      if (!url) return Promise.reject(new Error("Configure o endpoint do n8n no bloco 03."));
+      if (!url) return Promise.reject(new Error("Configure a URL do Webhook do n8n no bloco 03."));
       var c = resultado ? contexto() : { modelo: null, contas: [] };
       return fetch(url, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: sessao, pergunta: pergunta, modelo_llm: modeloLLM(),
                                modelo: c.modelo, contas: c.contas, planos: planos() })
       }).then(function (r) {
-        if (!r.ok) throw new Error("O n8n respondeu " + r.status + ". Confira se o workflow está ativo, se a URL é a de produção e se a credencial OpenRouter está escolhida nos três nós de modelo.");
+        if (!r.ok) throw new Error("O n8n respondeu com status " + r.status + ". Confira a URL e o workflow.");
         return r.json();
       }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
     }
     $("testar").addEventListener("click", function () {
       var s = $("status-conexao");
-      s.className = "status"; s.textContent = "testando, a equipe leva alguns segundos...";
+      s.className = "status"; s.textContent = "Testando conexão com a equipe...";
       chamar("Responda apenas: conexão ok.").then(function () {
-        s.className = "status ok"; s.textContent = "Conexão ok"; trilha();
+        s.className = "status ok"; s.textContent = "Conexão estabelecida com sucesso!"; trilha();
       }).catch(function (e) { s.className = "status erro"; s.textContent = e.message; trilha(); });
     });
 
-    // ---- 04 a equipe
+    // ---- 04 A Equipe
     function estadoAgente(nome, estado) {
       var el = document.querySelector('.agente[data-agente="' + nome + '"]');
+      if (!el) return;
       el.classList.remove("trabalhando", "pronto");
       var rotulo = el.querySelector(".estado");
-      if (estado === "trabalhando") { el.classList.add("trabalhando"); rotulo.innerHTML = 'trabalhando <span class="pontos"><span></span><span></span><span></span></span>'; }
-      else if (estado === "pronto") { el.classList.add("pronto"); rotulo.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check_circle</span> concluído'; }
-      else rotulo.textContent = "aguardando";
+      if (estado === "trabalhando") {
+        el.classList.add("trabalhando");
+        rotulo.innerHTML = 'analisando <span class="pontos"><span></span><span></span><span></span></span>';
+      } else if (estado === "pronto") {
+        el.classList.add("pronto");
+        rotulo.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check_circle</span> pronto';
+      } else {
+        rotulo.textContent = "aguardando";
+      }
     }
-    /* O n8n devolve a resposta dos três de uma vez. Enquanto ela não chega, o
-       painel acende o agente que provavelmente está trabalhando: a ordem é a
-       do workflow, o tempo de cada um é estimativa. */
+
     function animarEquipe() {
       var i = 0;
       AGENTES.forEach(function (a) { estadoAgente(a, "aguardando"); });
       estadoAgente(AGENTES[0], "trabalhando");
       var id = setInterval(function () {
         if (i < AGENTES.length - 1) { estadoAgente(AGENTES[i], "pronto"); i++; estadoAgente(AGENTES[i], "trabalhando"); }
-      }, 5000);
+      }, 4500);
       return function () { clearInterval(id); };
     }
+
     function bolha(classe, texto) {
       var d = document.createElement("div");
       d.className = "msg " + classe; d.textContent = texto;
@@ -505,6 +1208,7 @@
       return d;
     }
     function aviso_chat(t) { bolha("aviso", t); }
+
     function digitar(el, texto) {
       var i = 0, passo = Math.max(2, Math.round(texto.length / 60));
       return new Promise(function (ok) {
@@ -516,9 +1220,9 @@
         })();
       });
     }
+
     function mensagemAgente(a) {
       var nome = String(a.nome || "Agente"), chave = nome.toLowerCase();
-      var icones = { atlas: "query_stats", vera: "flag", ciro: "fact_check" };
       var d = document.createElement("div");
       d.className = "msg agente-msg"; d.dataset.agente = chave;
       var texto = String(a.texto || "");
@@ -526,19 +1230,21 @@
       var m = texto.match(/^\s*VEREDITO:\s*(aprovado|corrigido)[^\n]*\n*/i);
       if (m) {
         var corr = m[1].toLowerCase() === "corrigido";
-        selo = '<span class="selo' + (corr ? " corrigido" : "") + '"><span class="material-symbols-outlined" style="font-size:14px">' +
-               (corr ? "edit_note" : "verified") + "</span>" + (corr ? "corrigido" : "aprovado") + "</span>";
+        selo = '<span class="selo' + (corr ? " corrigido" : "") + '"><span class="material-symbols-outlined" style="font-size:13px">' +
+               (corr ? "edit_note" : "verified") + "</span> " + (corr ? "corrigido" : "aprovado") + "</span>";
         texto = texto.slice(m[0].length);
       }
-      d.innerHTML = '<div class="quem"><span class="material-symbols-outlined">' + (icones[chave] || "smart_toy") + "</span>" +
+      d.innerHTML = '<div class="quem"><span class="material-symbols-outlined">' +
+                    (chave === "atlas" ? "query_stats" : chave === "vera" ? "flag" : "fact_check") + "</span> " +
                     esc(nome) + " <small>" + esc(a.papel || "") + "</small>" + selo + '</div><div class="corpo"></div>';
       $("mensagens").appendChild(d);
       return digitar(d.querySelector(".corpo"), texto);
     }
+
     function perguntar(texto) {
       texto = texto.trim();
       if (!texto) return;
-      if (!resultado) { aviso_chat("Carregue a planilha no bloco 01 antes de perguntar."); return; }
+      if (!resultado) { aviso_chat("Carregue a planilha no bloco 01 primeiro."); return; }
       bolha("eu", texto);
       $("pergunta").value = "";
       $("enviar").disabled = true;
@@ -555,7 +1261,7 @@
           });
         });
         return cadeia.then(function () {
-          bolha("rodape", "Equipe respondeu em " + Math.round((performance.now() - t0) / 1000) + " s, com " + (r.modelo || modelo) + ".");
+          bolha("rodape", "Resposta em " + Math.round((performance.now() - t0) / 1000) + "s com " + (r.modelo || modelo));
         });
       }).catch(function (e) {
         parar();
@@ -566,6 +1272,7 @@
         $("t4").classList.add("feito");
       });
     }
+
     $("form").addEventListener("submit", function (e) { e.preventDefault(); perguntar($("pergunta").value); });
     $("pergunta").addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); perguntar(this.value); }
@@ -573,6 +1280,42 @@
     document.querySelectorAll("#sugestoes button").forEach(function (b) {
       b.addEventListener("click", function () { perguntar(b.textContent); });
     });
+
+    var salvoCtx = KovanModelo.recuperar();
+    if (salvoCtx && salvoCtx.contas && salvoCtx.contas.length) {
+      resultado = {
+        contas: salvoCtx.modelo.contas_elegiveis,
+        perdidas: salvoCtx.modelo.perdidas,
+        auc: salvoCtx.modelo.auc_fora_da_amostra,
+        pesos: {},
+        fila: salvoCtx.contas.map(function (c) {
+          return {
+            posicao: c.posicao_na_fila,
+            account_id: c.account_id,
+            segment: c.segmento,
+            country: c.pais,
+            churn: 0,
+            escore: c.escore_de_perda,
+            valor_em_risco: c.receita_12m_usd,
+            valor_esperado: c.valor_esperado_usd,
+            meses_desde_ultima_compra: c.meses_desde_ultima_compra,
+            meses_com_compra_12m: c.meses_com_compra_nos_ultimos_12,
+            meses_de_casa: 12,
+            razao_receita_12m: c.receita_12m_dividida_pela_dos_12m_anteriores,
+            receita_12m_sobre_pico: c.receita_12m_como_fracao_do_pico_anual
+          };
+        }),
+        acertos_fila: 0,
+        valor_esperado_fila: salvoCtx.contas.reduce(function (a, c) { return a + (c.valor_esperado_usd || 0); }, 0)
+      };
+      $("resumo").hidden = false;
+      $("k-contas").textContent = fmt.format(resultado.contas);
+      $("k-auc").textContent = dec(resultado.auc, 3);
+      $("k-acertos").textContent = resultado.fila.length + " contas";
+      $("k-esperado").textContent = compacto(resultado.valor_esperado_fila);
+      inicializarFiltrosECharts();
+    }
+
     trilha();
   })();
   </script>
