@@ -653,19 +653,25 @@
           </div>
         </div>
 
-        <div class="modelo-linha" style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:200px;">
-            <label for="modelo-llm" style="margin-top:0; font-size:12px; font-weight:700; color:var(--seg-texto, #2b2b2b);">Modelo LLM (OpenRouter)</label>
-            <select id="modelo-llm" style="width:100%; padding:6px 10px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1; background:#ffffff;">
-              <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 3 Super (Gratuito)</option>
-              <option value="qwen/qwen3.8-27b:free">Qwen 3.8 27B (Gratuito)</option>
-              <option value="typesafe/jev-router">Jev Router (TypeSafe)</option>
-              <option value="outro">Outro identificador...</option>
-            </select>
-          </div>
-          <div id="modelo-outro-caixa" hidden style="flex:1; min-width:200px;">
-            <label for="modelo-outro" style="margin-top:0; font-size:12px; font-weight:700; color:var(--seg-texto, #2b2b2b);">Identificador OpenRouter</label>
-            <input id="modelo-outro" type="text" placeholder="fornecedor/modelo:free" style="width:100%; padding:6px 10px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1; background:#ffffff;">
+        <!-- Seletor de Modelo LLM (OpenRouter) -->
+        <div class="modelo-linha" style="margin-bottom:12px;">
+          <label for="modelo-llm" style="margin-top:0; font-size:12px; font-weight:800; color:var(--seg-texto, #1b1233);">Modelo LLM (OpenRouter)</label>
+          <select id="modelo-llm" onchange="var c=document.getElementById('modelo-outro-caixa'); if(c){ c.style.display=(this.value==='outro'?'block':'none'); if(this.value==='outro'){ var i=document.getElementById('modelo-outro'); if(i) i.focus(); } }" style="width:100%; padding:9px 12px; font-size:13px; font-weight:600; border-radius:8px; border:1px solid #cbd5e1; background:#ffffff; color:#1e293b; cursor:pointer;">
+            <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 3 Super (Gratuito)</option>
+            <option value="qwen/qwen3.8-27b:free">Qwen 3.8 27B (Gratuito)</option>
+            <option value="typesafe/jev-router">Jev Router (TypeSafe)</option>
+            <option value="outro">Outro identificador...</option>
+          </select>
+
+          <div id="modelo-outro-caixa" style="display:none; margin-top:10px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
+            <label for="modelo-outro" style="margin-top:0; font-size:11.5px; font-weight:800; color:#1b1233; display:flex; align-items:center; gap:6px;">
+              <span class="material-symbols-outlined" style="font-size:16px; color:#0284c7;">tune</span>
+              Identificador do Modelo no OpenRouter
+            </label>
+            <input id="modelo-outro" type="text" placeholder="ex: meta-llama/llama-3.3-70b-instruct:free" style="width:100%; padding:8px 12px; font-size:13px; border-radius:6px; border:1px solid #94a3b8; background:#ffffff; margin-top:6px; box-sizing:border-box;">
+            <span style="display:block; margin-top:5px; font-size:11px; color:#64748b;">
+              Digite qualquer identificador suportado pela sua chave do OpenRouter (ex: <code>meta-llama/llama-3.3-70b-instruct:free</code>, <code>anthropic/claude-3.5-sonnet</code>, <code>openai/gpt-4o-mini</code>).
+            </span>
           </div>
         </div>
 
@@ -1064,34 +1070,46 @@
 
     // Configuração do Modelo LLM (OpenRouter)
     var selModelo = $("modelo-llm");
+    var caixaModeloOutro = $("modelo-outro-caixa");
+    var inputModeloOutro = $("modelo-outro");
+
+    function alternarModeloOutro() {
+      if (!selModelo || !caixaModeloOutro) return;
+      var eOutro = selModelo.value === "outro";
+      caixaModeloOutro.style.display = eOutro ? "block" : "none";
+      if (eOutro && inputModeloOutro) {
+        inputModeloOutro.focus();
+      }
+    }
+
     var salvoModelo = ler("kovan-modelo-llm");
     if (salvoModelo && selModelo.querySelector('option[value="' + salvoModelo + '"]')) {
       selModelo.value = salvoModelo;
     }
-    if ($("modelo-outro")) {
-      $("modelo-outro").value = ler("kovan-modelo-outro") || "";
+    if (inputModeloOutro) {
+      inputModeloOutro.value = ler("kovan-modelo-outro") || "";
+      inputModeloOutro.addEventListener("input", function () {
+        gravar("kovan-modelo-outro", this.value.trim());
+      });
+      inputModeloOutro.addEventListener("change", function () {
+        gravar("kovan-modelo-outro", this.value.trim());
+      });
     }
-    function mostrarOutro() {
-      if ($("modelo-outro-caixa")) {
-        $("modelo-outro-caixa").hidden = selModelo.value !== "outro";
-      }
-    }
-    mostrarOutro();
+
     selModelo.addEventListener("change", function () {
       gravar("kovan-modelo-llm", selModelo.value);
-      mostrarOutro();
+      alternarModeloOutro();
     });
-    if ($("modelo-outro")) {
-      $("modelo-outro").addEventListener("input", function () {
-        gravar("kovan-modelo-outro", this.value.trim());
-      });
-      $("modelo-outro").addEventListener("change", function () {
-        gravar("kovan-modelo-outro", this.value.trim());
-      });
-    }
+    selModelo.addEventListener("input", function () {
+      gravar("kovan-modelo-llm", selModelo.value);
+      alternarModeloOutro();
+    });
+
+    alternarModeloOutro();
+
     function modeloLLM() {
       if (selModelo.value === "outro") {
-        return $("modelo-outro") ? $("modelo-outro").value.trim() : "";
+        return inputModeloOutro ? inputModeloOutro.value.trim() : "";
       }
       return selModelo.value;
     }
