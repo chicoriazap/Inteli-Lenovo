@@ -653,19 +653,19 @@
           </div>
         </div>
 
-        <div class="modelo-linha" style="display:flex; gap:10px; margin-bottom:10px;">
-          <div style="flex:1;">
-            <label for="modelo-llm" style="margin-top:0">Modelo LLM (OpenRouter)</label>
-            <select id="modelo-llm">
+        <div class="modelo-linha" style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px;">
+            <label for="modelo-llm" style="margin-top:0; font-size:12px; font-weight:700; color:var(--seg-texto, #2b2b2b);">Modelo LLM (OpenRouter)</label>
+            <select id="modelo-llm" style="width:100%; padding:6px 10px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1; background:#ffffff;">
               <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 3 Super (Gratuito)</option>
               <option value="qwen/qwen3.8-27b:free">Qwen 3.8 27B (Gratuito)</option>
               <option value="typesafe/jev-router">Jev Router (TypeSafe)</option>
               <option value="outro">Outro identificador...</option>
             </select>
           </div>
-          <div id="modelo-outro-caixa" hidden style="flex:1;">
-            <label for="modelo-outro" style="margin-top:0">Identificador OpenRouter</label>
-            <input id="modelo-outro" type="text" placeholder="fornecedor/modelo:free">
+          <div id="modelo-outro-caixa" hidden style="flex:1; min-width:200px;">
+            <label for="modelo-outro" style="margin-top:0; font-size:12px; font-weight:700; color:var(--seg-texto, #2b2b2b);">Identificador OpenRouter</label>
+            <input id="modelo-outro" type="text" placeholder="fornecedor/modelo:free" style="width:100%; padding:6px 10px; font-size:12.5px; border-radius:6px; border:1px solid #cbd5e1; background:#ffffff;">
           </div>
         </div>
 
@@ -704,6 +704,8 @@
     };
 
     var $ = function (id) { return document.getElementById(id); };
+    function ler(chave) { try { return localStorage.getItem(chave); } catch (e) { return null; } }
+    function gravar(chave, v) { try { localStorage.setItem(chave, v); } catch (e) { /* sem armazenamento */ } }
     var linhas = [];
     var resultado = null;
     var sessao = "squad-cs-" + Math.random().toString(36).slice(2, 10);
@@ -1060,15 +1062,66 @@
       $("mensagens").scrollTop = $("mensagens").scrollHeight;
     }
 
+    // Configuração do Modelo LLM (OpenRouter)
+    var selModelo = $("modelo-llm");
+    var salvoModelo = ler("kovan-modelo-llm");
+    if (salvoModelo && selModelo.querySelector('option[value="' + salvoModelo + '"]')) {
+      selModelo.value = salvoModelo;
+    }
+    if ($("modelo-outro")) {
+      $("modelo-outro").value = ler("kovan-modelo-outro") || "";
+    }
+    function mostrarOutro() {
+      if ($("modelo-outro-caixa")) {
+        $("modelo-outro-caixa").hidden = selModelo.value !== "outro";
+      }
+    }
+    mostrarOutro();
+    selModelo.addEventListener("change", function () {
+      gravar("kovan-modelo-llm", selModelo.value);
+      mostrarOutro();
+    });
+    if ($("modelo-outro")) {
+      $("modelo-outro").addEventListener("input", function () {
+        gravar("kovan-modelo-outro", this.value.trim());
+      });
+      $("modelo-outro").addEventListener("change", function () {
+        gravar("kovan-modelo-outro", this.value.trim());
+      });
+    }
+    function modeloLLM() {
+      if (selModelo.value === "outro") {
+        return $("modelo-outro") ? $("modelo-outro").value.trim() : "";
+      }
+      return selModelo.value;
+    }
+
+    // Configuração e persistência do Endpoint n8n
+    if ($("endpoint")) {
+      var salvoEndpoint = ler("kovan-endpoint-expandido") || ler("kovan-endpoint");
+      if (salvoEndpoint) $("endpoint").value = salvoEndpoint;
+      $("endpoint").addEventListener("change", function () {
+        gravar("kovan-endpoint-expandido", this.value.trim());
+        gravar("kovan-endpoint", this.value.trim());
+      });
+    }
+
     function chamar(pergunta) {
       var url = $("endpoint").value.trim();
       if (!url) return Promise.reject(new Error("Configure o Endpoint do Webhook do n8n no bloco 03."));
+      var mod = modeloLLM();
+      if (!mod && selModelo.value === "outro") {
+        return Promise.reject(new Error("Informe o identificador do modelo no campo OpenRouter (ex: meta-llama/llama-3.3-70b-instruct:free)."));
+      }
       var c = resultado ? KovanModelo.contexto(resultado) : { modelo: null, contas: [] };
       return fetch(url, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: sessao, pergunta: pergunta, modelo_llm: $("modelo-llm").value,
+        body: JSON.stringify({ sessionId: sessao, pergunta: pergunta, modelo_llm: mod,
                                modelo: c.modelo, contas: c.contas, planos: PLANOS_EXEMPLO })
-      }).then(function (r) { return r.json(); }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
+      }).then(function (r) {
+        if (!r.ok) throw new Error("O n8n respondeu com status " + r.status + ". Confira a URL e o workflow.");
+        return r.json();
+      }).then(function (j) { return Array.isArray(j) ? j[0] : j; });
     }
 
     $("testar").addEventListener("click", function () {
