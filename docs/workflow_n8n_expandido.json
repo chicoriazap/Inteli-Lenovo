@@ -1,5 +1,5 @@
 {
- "name": "Kovan · Squad Expandido de 5 Agentes (Retenção, Finanças, Storytelling e Governança)",
+ "name": "Kovan · Squad de CS Expandido de 5 Sub-Agentes (Onboard, EWS, Finanças, Pitch e Governança)",
  "nodes": [
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000001",
@@ -13,7 +13,7 @@
    "webhookId": "e1a1c1d1-0000-4000-8000-0000000000aa",
    "parameters": {
     "httpMethod": "POST",
-    "path": "kovan-chat-NOME_DO_GRUPO-expandido",
+    "path": "kovan-chat-grupo-3-expandido",
     "responseMode": "responseNode",
     "options": {
      "allowedOrigins": "*"
@@ -22,7 +22,7 @@
   },
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000002",
-   "name": "Atlas",
+   "name": "CS-Onboard",
    "type": "@n8n/n8n-nodes-langchain.agent",
    "typeVersion": 1.7,
    "position": [
@@ -33,13 +33,13 @@
     "promptType": "define",
     "text": "={{ $('API do painel').first().json.body.pergunta }}",
     "options": {
-     "systemMessage": "=Você é Atlas, o analista quantitativo da Kovan Technologies LATAM. Seu papel é fornecer um diagnóstico rigoroso baseado em fatos e números.\n\nComo ler os dados:\n- escore_de_perda: probabilidade de parada de compra (0 a 1).\n- receita_12m_usd: receita acumulada nos 12 meses até 2024-02.\n- valor_esperado_usd: escore_de_perda * receita_12m_usd (critério de ordenação).\n- receita_12m_como_fracao_do_pico_anual: fracao referente ao pico (ex: 0.63 = queda de 37%).\n\nRegras:\n1. Responda estritamente com os dados fornecidos. Se a informação não constar, informe que não existe.\n2. Responda em até 5 linhas, tom profissional, sem emojis.\n\nRESUMO DO MODELO:\n{{ JSON.stringify($('API do painel').first().json.body.modelo || {}) }}\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}"
+     "systemMessage": "=Você é CS-Onboard, o especialista em Onboarding D+30 e Adoção Inicial de Customer Success da Kovan Technologies LATAM.\n\nSeu papel:\n1. Analisar as contas recém-chegadas e novos compradores (especialmente meses_de_casa baixos e contas em fase de implantação/ativação).\n2. Aplicar a Régua 1: CS automático pós-primeira entrega, validação técnica em D+15 e estímulo à 2ª compra em D+30 para assegurar a recorrência inicial e evitar o churn precoce.\n3. Diagnosticar gargalos de ativação e prescrever ações práticas imediatas para o Account Manager.\n\nRegras:\n1. Baseie-se estritamente nos dados da fila e no plano de Onboarding D+30.\n2. Responda em até 5 linhas, tom profissional e direto, sem emojis.\n\nRESUMO DO MODELO:\n{{ JSON.stringify($('API do painel').first().json.body.modelo || {}) }}\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}\n\nPLANOS DE AÇÃO:\n{{ JSON.stringify($('API do painel').first().json.body.planos || {}) }}"
     }
    }
   },
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000003",
-   "name": "Dante",
+   "name": "CS-EWS",
    "type": "@n8n/n8n-nodes-langchain.agent",
    "typeVersion": 1.7,
    "position": [
@@ -48,15 +48,15 @@
    ],
    "parameters": {
     "promptType": "define",
-    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nDiagnóstico de Dados (Atlas):\n{{ $('Atlas').first().json.output }}",
+    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nDiagnóstico de Onboarding (CS-Onboard):\n{{ $('CS-Onboard').first().json.output }}",
     "options": {
-     "systemMessage": "=Você é Dante, o analista de risco e valoração financeira de retenção da Kovan Technologies LATAM.\n\nSeu papel:\n1. Avaliar a viabilidade financeira e rentabilidade do investimento na retenção da conta.\n2. Analisar o trade-off entre o valor em risco (receita_12m_usd) e o custo de perder o cliente vs. conceder benefícios ou atendimento especial.\n3. Indicar se a conta é de margem crítica e qual o orçamento máximo viável para intervenção sem comprometer a saúde financeira.\n\nRegras:\n1. Fundamente suas conclusões na receita de 12m e no escore trazido pelo Atlas.\n2. Tom executivo, direto e analítico. Máximo de 5 linhas, sem emojis.\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}"
+     "systemMessage": "=Você é CS-EWS, o especialista em Early Warning System (EWS) e Monitor de Ritmo de Recorrência da Kovan Technologies LATAM.\n\nSeu papel:\n1. Monitorar o intervalo histórico entre compras e identificar contas que ultrapassaram o percentil 90 (P90) de silêncio de compra do seu segmento (analisando meses_desde_ultima_compra e queda contra o pico anual).\n2. Aplicar a Régua 2 (Gatilho Dinâmico P90) por segmento (ex: Enterprise 90 dias, Médio 45 dias, Pequeno 30 dias).\n3. Prescrever gatilhos de alerta preventivo para ERP/CRM e intervenções de pós-vendas antes que o churn se consume.\n\nRegras:\n1. Responda fundamentado nos dados de recorrência da fila e nos gatilhos P90.\n2. Responda em até 5 linhas, tom analítico e executivo, sem emojis.\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}"
     }
    }
   },
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000004",
-   "name": "Vera",
+   "name": "Dante",
    "type": "@n8n/n8n-nodes-langchain.agent",
    "typeVersion": 1.7,
    "position": [
@@ -65,9 +65,9 @@
    ],
    "parameters": {
     "promptType": "define",
-    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nDados do Atlas:\n{{ $('Atlas').first().json.output }}\n\nAnálise Financeira do Dante:\n{{ $('Dante').first().json.output }}",
+    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nDiagnóstico CS-Onboard: {{ $('CS-Onboard').first().json.output }}\nDiagnóstico CS-EWS: {{ $('CS-EWS').first().json.output }}",
     "options": {
-     "systemMessage": "=Você é Vera, a estrategista de planos de ação da Kovan Technologies LATAM. Mapeie as ações obrigatórias das áreas (Onboarding D+30, Gatilho P90, Pipeline Gap CRM) para cada caso.\n\nRegras:\n1. Recomende apenas ações dos planos fornecidos abaixo.\n2. Indique a área responsável e a régua acionada.\n3. Máximo de 6 linhas, tom profissional, sem emojis.\n\nPLANOS DE AÇÃO:\n{{ JSON.stringify($('API do painel').first().json.body.planos || {}, null, 1) }}"
+     "systemMessage": "=Você é Dante, o analista quantitativo de risco financeiro e valoração de carteira da Kovan Technologies LATAM.\n\nSeu papel:\n1. Avaliar a perda esperada em dólares (valor_esperado_usd = escore_de_perda * receita_12m_usd) e a concentração de receita.\n2. Aplicar a Régua 3 (Pipeline Gap CRM para Strategic Accounts e grandes volumes).\n3. Determinar o teto de orçamento viável para retenção e justificar o ROI financeiro das ações de retenção propostas por CS-Onboard e CS-EWS.\n\nRegras:\n1. Fundamente suas conclusões na receita de 12M e no valor esperado em risco.\n2. Máximo de 5 linhas, tom executivo e objetivo, sem emojis.\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}"
     }
    }
   },
@@ -82,9 +82,9 @@
    ],
    "parameters": {
     "promptType": "define",
-    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nAtlas (Dados): {{ $('Atlas').first().json.output }}\nDante (Finanças): {{ $('Dante').first().json.output }}\nVera (Ação): {{ $('Vera').first().json.output }}",
+    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nCS-Onboard: {{ $('CS-Onboard').first().json.output }}\nCS-EWS: {{ $('CS-EWS').first().json.output }}\nDante: {{ $('Dante').first().json.output }}",
     "options": {
-     "systemMessage": "=Você é Livia, a Executive Storyteller e especialista em narrativa persuasiva de vendas B2B da Kovan Technologies LATAM.\n\nSeu papel:\n1. Conectar a análise técnica de Atlas, Dante e Vera em um 'Pitch Executivo' fluido e altamente impactante para o Account Manager apresentar ao cliente ou à diretoria.\n2. Estruturar a narrativa no formato: [Contexto/Dor do Cliente] -> [Impacto no Negócio] -> [Proposta de Valor e Próximo Passo].\n3. Garantir um tom consultivo, sofisticado e altamente alinhado ao ambiente de negócios B2B.\n\nRegras:\n- Máximo de 6 linhas, tom executivo e elegante, sem emojis."
+     "systemMessage": "=Você é Livia, a Executive Storyteller e especialista em comunicação persuasiva B2B da Kovan Technologies LATAM.\n\nSeu papel:\n1. Conectar os diagnósticos de CS-Onboard, CS-EWS e Dante em um Pitch Executivo fluido e persuasivo para o Account Manager apresentar ao cliente ou à diretoria.\n2. Estruturar a narrativa no formato consultivo: [Diagnóstico da Conta & Dor] -> [Impacto no Negócio / Risco Financeiro] -> [Proposta de Valor e Pitch de Retenção].\n3. Garantir tom sofisticado, estratégico e consultivo.\n\nRegras:\n- Máximo de 6 linhas, tom executivo e elegante, sem emojis."
     }
    }
   },
@@ -99,15 +99,15 @@
    ],
    "parameters": {
     "promptType": "define",
-    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nAtlas: {{ $('Atlas').first().json.output }}\nDante: {{ $('Dante').first().json.output }}\nVera: {{ $('Vera').first().json.output }}\nLivia: {{ $('Livia').first().json.output }}",
+    "text": "=Pergunta do Account Manager: {{ $('API do painel').first().json.body.pergunta }}\n\nCS-Onboard: {{ $('CS-Onboard').first().json.output }}\nCS-EWS: {{ $('CS-EWS').first().json.output }}\nDante: {{ $('Dante').first().json.output }}\nLivia: {{ $('Livia').first().json.output }}",
     "options": {
-     "systemMessage": "=Você é Ciro, o Revisor Executivo, Guardião do Compliance e PORTADOR DA MEMÓRIA DA SESSÃO da Kovan Technologies LATAM.\n\nSeu papel:\n1. Fazer o fact-checking rigoroso de todos os números e ações citadas pelos colegas.\n2. Manter a coerência com as interações passadas armazenadas na sua memória.\n3. Emitir o veredito de aprovação/correção e apresentar o resumo unificado ao Account Manager.\n\nFormato da resposta:\nPrimeira linha: VEREDITO: aprovado (ou VEREDITO: corrigido, com breve justificativa).\nLinha em branco.\nResumo Executivo Consolidado com tom profissional e conciso (máximo 8 linhas, sem emojis).\n\nPLANOS DE AÇÃO:\n{{ JSON.stringify($('API do painel').first().json.body.planos || {}, null, 1) }}\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}"
+     "systemMessage": "=Você é Ciro, o Orquestrador Executivo, Guardião do Compliance e PORTADOR DA MEMÓRIA DA SESSÃO da Kovan Technologies LATAM.\n\nSeu papel:\n1. Fazer o fact-checking rigoroso de todos os números, métricas e réguas citadas pelos colegas do squad.\n2. Manter a coerência com as interações passadas armazenadas na sua memória de sessão.\n3. Emitir o veredito oficial de validação e apresentar a síntese unificada com as prioridades de ação para o Account Manager.\n\nFormato obrigatório da sua resposta:\nPrimeira linha: VEREDITO: aprovado (ou VEREDITO: corrigido, com breve justificativa).\nLinha em branco.\nSíntese executiva com direcionamento claro das prioridades de Customer Success (máximo 7 linhas, sem emojis).\n\nPLANOS DE AÇÃO:\n{{ JSON.stringify($('API do painel').first().json.body.planos || {}, null, 1) }}\n\nFILA DO CICLO:\n{{ JSON.stringify($('API do painel').first().json.body.contas || []) }}"
     }
    }
   },
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000007",
-   "name": "Modelo do Atlas",
+   "name": "Modelo do CS-Onboard",
    "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
    "typeVersion": 1,
    "position": [
@@ -123,7 +123,7 @@
   },
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000008",
-   "name": "Modelo do Dante",
+   "name": "Modelo do CS-EWS",
    "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
    "typeVersion": 1,
    "position": [
@@ -139,7 +139,7 @@
   },
   {
    "id": "e1a1c1d1-0000-4000-8000-000000000009",
-   "name": "Modelo da Vera",
+   "name": "Modelo do Dante",
    "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
    "typeVersion": 1,
    "position": [
@@ -212,7 +212,7 @@
    "parameters": {
     "respondWith": "json",
     "options": {},
-    "responseBody": "={{ { modelo: $('API do painel').first().json.body.modelo_llm || 'nvidia/nemotron-3-super-120b-a12b:free', agentes: [{ nome: 'Atlas', papel: 'Análise & Métricas', texto: $('Atlas').first().json.output }, { nome: 'Dante', papel: 'Valoração & Risco', texto: $('Dante').first().json.output }, { nome: 'Vera', papel: 'Playbook & Ações', texto: $('Vera').first().json.output }, { nome: 'Livia', papel: 'Storytelling/Pitch', texto: $('Livia').first().json.output }, { nome: 'Ciro', papel: 'Revisor & Memória', texto: $json.output } ] } }}"
+    "responseBody": "={{ { modelo: $('API do painel').first().json.body.modelo_llm || 'nvidia/nemotron-3-super-120b-a12b:free', agentes: [{ nome: 'CS-Onboard', papel: 'Onboarding D+30', texto: $('CS-Onboard').first().json.output }, { nome: 'CS-EWS', papel: 'Monitor P90', texto: $('CS-EWS').first().json.output }, { nome: 'Dante', papel: 'Valoração & Risco', texto: $('Dante').first().json.output }, { nome: 'Livia', papel: 'Storytelling/Pitch', texto: $('Livia').first().json.output }, { nome: 'Ciro', papel: 'Orquestrador & Memória', texto: $json.output } ] } }}"
    }
   }
  ],
@@ -221,14 +221,25 @@
    "main": [
     [
      {
-      "node": "Atlas",
+      "node": "CS-Onboard",
       "type": "main",
       "index": 0
      }
     ]
    ]
   },
-  "Atlas": {
+  "CS-Onboard": {
+   "main": [
+    [
+     {
+      "node": "CS-EWS",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "CS-EWS": {
    "main": [
     [
      {
@@ -240,17 +251,6 @@
    ]
   },
   "Dante": {
-   "main": [
-    [
-     {
-      "node": "Vera",
-      "type": "main",
-      "index": 0
-     }
-    ]
-   ]
-  },
-  "Vera": {
    "main": [
     [
      {
@@ -283,11 +283,22 @@
     ]
    ]
   },
-  "Modelo do Atlas": {
+  "Modelo do CS-Onboard": {
    "ai_languageModel": [
     [
      {
-      "node": "Atlas",
+      "node": "CS-Onboard",
+      "type": "ai_languageModel",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Modelo do CS-EWS": {
+   "ai_languageModel": [
+    [
+     {
+      "node": "CS-EWS",
       "type": "ai_languageModel",
       "index": 0
      }
@@ -299,17 +310,6 @@
     [
      {
       "node": "Dante",
-      "type": "ai_languageModel",
-      "index": 0
-     }
-    ]
-   ]
-  },
-  "Modelo da Vera": {
-   "ai_languageModel": [
-    [
-     {
-      "node": "Vera",
       "type": "ai_languageModel",
       "index": 0
      }
