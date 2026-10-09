@@ -250,8 +250,14 @@
       align-items: center;
       text-align: center;
       position: relative;
-      overflow: hidden;
-      transition: all .25s;
+      cursor: help;
+      transition: all .25s ease;
+    }
+    .agente-card:hover {
+      border-color: #00d285;
+      background: #ffffff;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      z-index: 30;
     }
     .agente-card .avatar-box {
       width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -269,6 +275,72 @@
     .agente-card .nome { font-weight: 800; font-size: 12.5px; color: #1b1233; line-height: 1.1; }
     .agente-card .papel { font-size: 10.5px; color: #64748b; margin-top: 2px; font-weight: 600; }
     .agente-card .estado { font-size: 10.5px; font-weight: 700; margin-top: 4px; color: #94a3b8; display: flex; align-items: center; gap: 2px; }
+
+    /* Tooltip Hover Explicativo do Escopo dos Agentes de IA */
+    .agente-tooltip {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      width: 220px;
+      background: #1b1233;
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 11.5px;
+      line-height: 1.45;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease, visibility .2s;
+      box-shadow: 0 10px 25px rgba(27, 18, 51, 0.35);
+      z-index: 100;
+    }
+    .agente-tooltip::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 6px 6px 6px;
+      border-style: solid;
+      border-color: transparent transparent #1b1233 transparent;
+    }
+    .agente-card:hover .agente-tooltip,
+    .agente-card:focus-within .agente-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    .tooltip-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .agente-card[data-agente="cs-onboard"] .tooltip-tag { background: rgba(0, 210, 133, 0.2); color: #00d285; }
+    .agente-card[data-agente="cs-ews"] .tooltip-tag { background: rgba(2, 132, 199, 0.2); color: #38bdf8; }
+    .agente-card[data-agente="dante"] .tooltip-tag { background: rgba(255, 255, 255, 0.15); color: #f1f5f9; }
+    .agente-card[data-agente="livia"] .tooltip-tag { background: rgba(139, 92, 246, 0.25); color: #c4b5fd; }
+    .agente-card[data-agente="ciro"] .tooltip-tag { background: rgba(255, 69, 69, 0.25); color: #ff8080; }
+    
+    .agente-tooltip strong { display: block; font-size: 12px; color: #ffffff; margin-bottom: 4px; }
+    .agente-tooltip p { margin: 0; color: #cbd5e1; font-size: 11px; }
+
+    /* Ancoragem nas extremidades para evitar corte lateral */
+    .agente-card:first-child .agente-tooltip { left: 0; transform: translateX(0) translateY(6px); }
+    .agente-card:first-child:hover .agente-tooltip { transform: translateX(0) translateY(0); }
+    .agente-card:first-child .agente-tooltip::before { left: 20px; transform: none; }
+
+    .agente-card:last-child .agente-tooltip { left: auto; right: 0; transform: translateX(0) translateY(6px); }
+    .agente-card:last-child:hover .agente-tooltip { transform: translateX(0) translateY(0); }
+    .agente-card:last-child .agente-tooltip::before { left: auto; right: 20px; transform: none; }
 
     /* Estados dos Agentes */
     .agente-card.trabalhando { border-color: #00d285; background: #ffffff; box-shadow: 0 2px 8px rgba(0,210,133,0.15); }
@@ -522,37 +594,62 @@
           </div>
         </div>
 
-        <!-- Equipe de 5 Sub-Agentes de Customer Success -->
+        <!-- Equipe de 5 Sub-Agentes de Customer Success (com Hover Explicativo) -->
         <div class="equipe-squad">
-          <div class="agente-card" data-agente="cs-onboard">
+          <div class="agente-card" data-agente="cs-onboard" tabindex="0">
             <div class="avatar-box"><span class="material-symbols-outlined">rocket_launch</span></div>
             <span class="nome">CS-Onboard</span>
             <span class="papel">Onboarding D+30</span>
             <span class="estado">aguardando</span>
+            <div class="agente-tooltip">
+              <span class="tooltip-tag">Régua 1 &middot; Ativação</span>
+              <strong>CS-Onboard</strong>
+              <p>Monitora a ativação e 1ª entrega nos primeiros 30 a 90 dias. Foco em contas novas para garantir a 2ª compra e adoção inicial, evitando churn precoce.</p>
+            </div>
           </div>
-          <div class="agente-card" data-agente="cs-ews">
+          <div class="agente-card" data-agente="cs-ews" tabindex="0">
             <div class="avatar-box"><span class="material-symbols-outlined">speed</span></div>
             <span class="nome">CS-EWS</span>
             <span class="papel">Monitor P90</span>
             <span class="estado">aguardando</span>
+            <div class="agente-tooltip">
+              <span class="tooltip-tag">Régua 2 &middot; Recorrência</span>
+              <strong>CS-EWS</strong>
+              <p>Early Warning System de recompra. Dispara alertas proativos no ERP/CRM quando a conta ultrapassa o percentil 90 (P90) do ritmo de compras do seu segmento.</p>
+            </div>
           </div>
-          <div class="agente-card" data-agente="dante">
+          <div class="agente-card" data-agente="dante" tabindex="0">
             <div class="avatar-box"><span class="material-symbols-outlined">monetization_on</span></div>
             <span class="nome">Dante</span>
             <span class="papel">Valoração & Risco</span>
             <span class="estado">aguardando</span>
+            <div class="agente-tooltip">
+              <span class="tooltip-tag">Régua 3 &middot; Financeiro</span>
+              <strong>Dante</strong>
+              <p>Analista quantitativo de risco financeiro. Prioriza contas Enterprise e gaps de pipeline no CRM, calculando o Valor Esperado em Risco (USD) e o ROI da retenção.</p>
+            </div>
           </div>
-          <div class="agente-card" data-agente="livia">
+          <div class="agente-card" data-agente="livia" tabindex="0">
             <div class="avatar-box"><span class="material-symbols-outlined">record_voice_over</span></div>
             <span class="nome">Livia</span>
             <span class="papel">Storytelling/Pitch</span>
             <span class="estado">aguardando</span>
+            <div class="agente-tooltip">
+              <span class="tooltip-tag">Consultivo &middot; Pitch</span>
+              <strong>Livia</strong>
+              <p>Storyteller executiva de negócios. Traduz métricas e diagnósticos do modelo em narrativas consultivas, contrapropostas e pitches para os gerentes de conta.</p>
+            </div>
           </div>
-          <div class="agente-card" data-agente="ciro">
+          <div class="agente-card" data-agente="ciro" tabindex="0">
             <div class="avatar-box"><span class="material-symbols-outlined">fact_check</span></div>
             <span class="nome">Ciro</span>
             <span class="papel">Orquestrador & Memória</span>
             <span class="estado">aguardando</span>
+            <div class="agente-tooltip">
+              <span class="tooltip-tag">Orquestrador &middot; Compliance</span>
+              <strong>Ciro</strong>
+              <p>Coordenador e guardião da memória de sessão. Valida consistência técnica, emite os vereditos executivos (Aprovado / Corrigido) e sintetiza o plano final.</p>
+            </div>
           </div>
         </div>
 
